@@ -1,0 +1,2 @@
+# V18 Smart Reply Tests
+Adds an in-message reply-planning panel whose question and quick-response choices change by grade, audience, and prospect stage. Selecting a choice suggests a next follow-up template and updates the stage selector for drafting purposes. This is only an internal simulation/planning aid: it does not claim to detect incoming WhatsApp replies and does not automatically mark a lead as having replied. All outbound messages remain manually reviewed and opened in WhatsApp.

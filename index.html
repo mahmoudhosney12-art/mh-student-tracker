@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MH Student Tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#0b1630">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="MH Tracker">
+<meta name="format-detection" content="telephone=no">
+
+<style>
+:root{--bg:#0b1630;--sf:#13224a;--sf2:#1f3366;--tx:#f2f4fa;--mu:#9aa6c7;--gd:#d4af37;--ok:#3ecf8e;--bad:#ff6b6b;--wn:#f5b942;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:400 15px/1.6 Cairo,Tahoma,sans-serif}
+h2{font-size:20px;margin:.3em 0}h3{font-size:16px;color:var(--gd);margin:.8em 0 .3em}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--sf2)}
+.brand b{color:var(--gd);font-size:17px}.brand small{display:block;color:var(--mu);font-size:11px}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;background:var(--sf)}
+nav button{white-space:nowrap;background:none;border:0;color:var(--mu);padding:8px 14px;border-radius:8px;font:inherit;cursor:pointer;text-align:right}
+nav button.on{color:var(--bg);background:var(--gd);font-weight:600}
+main{padding:16px;max-width:1000px;width:100%;margin:0 auto}
+@media(min-width:800px){.lay{display:flex}nav{flex-direction:column;width:180px;min-height:calc(100vh - 56px);flex-shrink:0}main{flex:1}}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.card{background:var(--sf);border-radius:10px;padding:12px;margin-bottom:10px}
+.k{font-size:24px;font-weight:800}.mu{color:var(--mu);font-size:13px}
+input,select,textarea{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--sf2);border-radius:8px;padding:8px;font:inherit}
+label{display:block;font-size:13px;color:var(--mu);margin:8px 0 2px}
+.btn{background:var(--gd);color:var(--bg);border:0;border-radius:8px;padding:7px 12px;font:600 14px Cairo,sans-serif;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.s{background:var(--sf2);color:var(--tx)}.btn.d{background:var(--bad);color:#fff}
+.btn:focus-visible,input:focus-visible,select:focus-visible,nav button:focus-visible,textarea:focus-visible{outline:2px solid var(--gd);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1 1 130px}.row>.btn{flex:0 0 auto}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px;text-align:right;border-bottom:1px solid var(--sf2);white-space:nowrap}th{color:var(--mu);font-weight:600}
+.tag{padding:1px 8px;border-radius:99px;font-size:12px;background:var(--sf2)}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.wn{color:var(--wn)}
+dialog{background:var(--sf);color:var(--tx);border:1px solid var(--gd);border-radius:12px;width:min(94vw,480px);max-height:88vh}
+dialog::backdrop{background:#000a}
+#toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--gd);color:var(--bg);padding:8px 16px;border-radius:8px;display:none;z-index:9;font-weight:600}
+.empty{text-align:center;color:var(--mu);padding:20px}
+.warn{background:#3a2d0a;border:1px solid var(--wn);border-radius:8px;padding:8px;font-size:13px;margin-bottom:10px}
+.st{min-width:84px}.st.present{background:#14503a}.st.absent{background:#6b2230}.st.late{background:#6b5410}.st.excused{background:#2c3f78}
+html{-webkit-text-size-adjust:100%}button,a,select{touch-action:manipulation}
+.btn{min-height:44px;padding:10px 14px}input,select,textarea{min-height:44px;font-size:16px}
+#bar{display:none}
+@media(max-width:799px){nav{display:none}main{padding-bottom:96px}
+#bar{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--sf2);padding-bottom:env(safe-area-inset-bottom,0px);z-index:7}
+#bar button{flex:1;background:none;border:0;color:var(--mu);font:inherit;font-size:11px;padding:8px 2px;min-height:56px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+#bar button b{font-size:20px;font-weight:400}#bar button.on{color:var(--gd)}
+.rs table,.rs tbody,.rs tr,.rs td{display:block;white-space:normal}.rs tr:has(th){display:none}
+.rs tr{padding:8px 0;border-bottom:1px solid var(--sf2)}.rs td{border:0;padding:3px 0}.rs .btn{margin:2px 0}}
+@media(max-width:799px){#toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}}
+#sf,#off{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;margin:0;border-radius:0;text-align:center}
+#sub{display:none}.bg{display:inline-block;min-width:16px;height:16px;line-height:16px;border-radius:8px;background:var(--bad);color:#fff;font-size:10px;font-style:normal;margin-inline-start:4px;padding:0 4px}
+@media(max-width:799px){#sub.on{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--sf2);position:sticky;top:env(safe-area-inset-top,0px);z-index:6}#sub button{white-space:nowrap;background:var(--sf);border:0;color:var(--mu);padding:7px 14px;border-radius:16px;font:inherit;font-size:13px;cursor:pointer}#sub button.on{background:var(--gd);color:var(--bg);font-weight:600}}
+#ub{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--sf2);border:1px solid var(--gd);border-radius:10px;padding:8px 12px;display:none;justify-content:space-between;align-items:center;gap:8px}@media(min-width:800px){#ub{bottom:20px;max-width:420px;left:auto}}
+#lk{position:fixed;inset:0;z-index:2147483647;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center}#lk input{font-size:24px;text-align:center;letter-spacing:6px;max-width:260px}#lk .rc{display:none;flex-direction:column;gap:8px;align-items:center}
+</style>
+</head>
+<body>
+<div id="sf" class="warn" style="display:none;border-color:var(--bad)">⚠ تعذّر حفظ البيانات في هذا الجهاز (المساحة ممتلئة أو التخزين محظور). صدّر نسخة احتياطية الآن من «النسخ الاحتياطي».</div><div id="off" class="warn" style="display:none">لا يوجد اتصال بالإنترنت: التطبيق وبياناتك تعمل محليًا، أما واتساب فيحتاج إنترنت.</div>
+<header><div class="brand"><b>MH Student Tracker</b><small id="bn">من الفوضى إلى النظام</small></div><span class="mu"><a id="hw" target="_blank" rel="noopener" style="color:var(--gd)">واتساب المدرس</a> · نسخة محلية بدون تسجيل دخول</span></header>
+<div id="sub"></div>
+<div class="lay"><nav id="nav"></nav><main id="app"></main></div>
+<div id="lk"><h2>MH Student Tracker</h2><div class="mu">أدخل رمز القفل</div><input id="lkp" type="password" inputmode="numeric" autocomplete="off" maxlength="8"><button class="btn" id="lkg">دخول</button><div id="lke" class="bad"></div><a href="#" id="lkf" style="color:var(--gd)">نسيت الرمز؟</a><div class="rc" id="lkr"><div class="mu">أدخل كود الاسترجاع الذي حُفظ عند التفعيل</div><input id="lkc" dir="ltr" style="letter-spacing:2px;font-size:18px"><button class="btn s" id="lkx">استرجاع وإلغاء القفل</button></div></div>
+<div id="bar"></div><dialog id="dlg"></dialog><div id="ub"></div><div id="toast"></div>
+<script>
+const KEY='mh_tracker_v3_clean';let mem=null;
+const uid=()=>Math.random().toString(36).slice(2,12);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const dg=s=>String(s??'').replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c));
+const nph=s=>dg(s).replace(/[\s\-().]/g,'').replace(/^(?:\+|00)?20(?=1\d{9}$)/,'0');
+const na=s=>dg(s).toLowerCase().replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[\u064B-\u065F\u0640]/g,'');
+const IDR=/^[a-z0-9]{1,16}$/i,DR=/^\d{4}-\d\d-\d\d$/,PR=/^\d{4}-\d\d$/;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=s=>document.querySelector(s);
+const PH=/^01[0125]\d{8}$/;
+const AR={present:'حاضر',absent:'غائب',late:'متأخر',excused:'بعذر'},ORD=['present','absent','late','excused'];
+const SL={need:'تحتاج إلى تواصل',prep:'تم تجهيز الرسالة',done:'تم التواصل يدويًا',noreply:'لم يتم الرد',later:'تحتاج إلى متابعة لاحقة',closed:'أُغلقت المتابعة'};
+const MN=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const DN=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const TPL0={'غياب طالب':['parent','ولي أمر الطالب [اسم الطالب]، نحيطكم علمًا بغيابه عن حصة [المجموعة] بتاريخ [التاريخ]. نرجو متابعة انتظامه. — [اسم المدرس]'],
+'تكرار الغياب':['parent','ولي أمر الطالب [اسم الطالب]، تكرر غياب الطالب في [المجموعة] مؤخرًا. نرجو التواصل لمعرفة الأسباب وترتيب الانتظام. — [اسم المدرس]'],
+'تأخر الاشتراك':['parent','ولي أمر الطالب [اسم الطالب]، اشتراك شهر [الشهر] لم يُسدَّد بعد. المبلغ المستحق [المبلغ المستحق] جنيه. — [اسم المدرس]'],
+'تذكير بالسداد':['parent','ولي أمر الطالب [اسم الطالب]، نذكّركم بأن المتبقي من اشتراك شهر [الشهر] هو [المبلغ المتبقي] جنيه. — [اسم المدرس]'],
+'تأكيد استلام دفعة':['parent','ولي أمر الطالب [اسم الطالب]، تم تسجيل دفعتكم عن شهر [الشهر]. المتبقي: [المبلغ المتبقي] جنيه. شكرًا لكم. — [اسم المدرس]'],
+'تهنئة بالتقدم والالتزام':['parent','ولي أمر الطالب [اسم الطالب]، يسعدني إبلاغكم بتقدمه والتزامه في [المجموعة]. بارك الله فيه. — [اسم المدرس]'],
+'انخفاض الالتزام بالحضور':['parent','ولي أمر الطالب [اسم الطالب]، لاحظنا انخفاض انتظامه في الحضور بـ[المجموعة]. نرجو المتابعة معنا. — [اسم المدرس]'],
+'تغيير موعد حصة':['parent','ولي أمر الطالب [اسم الطالب]، نعلمكم بتغيير موعد حصة [المجموعة] ليكون: ........ — [اسم المدرس]'],
+'تذكير بموعد الحصة':['parent','ولي أمر الطالب [اسم الطالب]، نذكّركم بموعد حصة [المجموعة] بتاريخ [التاريخ]. — [اسم المدرس]'],
+'دعوة جروب المجموعة':['parent','ولي أمر الطالب [اسم الطالب]، تم إنشاء جروب واتساب لمجموعة [المجموعة] لمتابعة المواعيد والمستجدات. رابط الانضمام: [رابط الجروب] — [اسم المدرس]'],
+'تجديد الاشتراك':['parent','ولي أمر الطالب [اسم الطالب]، أتمّ الطالب [عدد الحصص] حصص من دورة هذا الشهر في [المجموعة]. نذكّركم بموعد تجديد الاشتراك للدورة القادمة ([المبلغ المستحق] جنيه). — [اسم المدرس]'],
+'تقرير الشهر':['parent','ولي أمر الطالب [اسم الطالب]، تقرير شهر [الشهر]: حضر [حضور] من [إجمالي الحصص] حصص وغاب [غياب]. الاشتراك: [الحالة المالية]. كود الطالب: [كود الطالب]. شكرًا لثقتكم — [اسم المدرس]'],
+'رسالة عامة لولي الأمر':['parent','ولي أمر الطالب [اسم الطالب]، ........ — [اسم المدرس]'],
+'رسالة خاصة للطالب':['student','[اسم الطالب]، ........ — [اسم المدرس]'],
+'متابعة بعد تواصل سابق':['parent','ولي أمر الطالب [اسم الطالب]، نتابع معكم بخصوص تواصلنا السابق. هل من مستجدات؟ — [اسم المدرس]']};
+const OLD=JSON.parse(JSON.stringify(TPL0));Object.values(TPL0).forEach(v=>v[1]=v[1].replace('— [اسم المدرس]','— [اسم المدرس] | واتساب: [رقم المدرس]'));
+const PLAN0={goal:30,daily:40,rates:{reply:25,interest:50,book:60,attend:70,enroll:40}};
+const FTPL0='أهلًا بحضرتك، تذكير لطيف بخصوص الحصة المجانية يوم الجمعة لطلاب [الصف]. لو حابب تعرف التفاصيل رد علينا، ولو مش مهتم رد بـ «لا» ولن نكرر التواصل. — [اسم المدرس]';
+const PTPL0='أهلًا بحضرتك، بننظم حصة مجانية يوم الجمعة لطلاب [الصف] للتعرّف على طريقة الشرح وحل أسئلة مهمة. لو تحب تعرف الموعد والتفاصيل رد علينا. الأماكن حسب السعة الفعلية للمجموعة. — [اسم المدرس]';
+let corrupt=false,RR=[],storageBlocked=false,saveFailureNotice=false;
+const CA='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function rnd(n){let a=new Uint32Array(n);try{crypto.getRandomValues(a)}catch(e){a=a.map(()=>Math.floor(Math.random()*4294967296))}return a}
+function newCode(reg,pre,n){const used=new Set(reg);for(;;){const r=rnd(n);let c=pre;for(let k=0;k<n;k++)c+=CA[r[k]%CA.length];if(!used.has(c)){reg.push(c);return c}}}
+function fixCodes(o){o.codes=Array.isArray(o.codes)?o.codes:[];const reg=new Set(o.codes);const add=c=>{if(typeof c==='string'&&c&&!reg.has(c)){reg.add(c);o.codes.push(c)}};o.students.forEach(s=>add(s.code));o.fridays.forEach(f=>Object.values(f.codes||{}).forEach(add));o.students.forEach(s=>{if(!s.code)s.code=newCode(o.codes,'MH-',5)})}
+const codeKey=c=>String(c||'').replace('-','');
+const normCode=r=>String(dg(r)).toUpperCase().replace(/[^A-Z0-9]/g,'');
+const codeMatch=(s,q)=>{const k=normCode(q);return k.length>=2&&codeKey(s.code).includes(k)};
+function seed(){return fix({students:[],groups:[]})}
+function fix(o){o.students=(o.students||[]).map(s=>({lastContact:'',nextAction:'',nextDate:'',...s,enrolled:s.enrolled||today()}));['groups','sessions','bills','log','actions','prospects','fridays'].forEach(k=>o[k]||=[]);o.tpl||=JSON.parse(JSON.stringify(TPL0));Object.keys(TPL0).forEach(k=>{if(!o.tpl[k])o.tpl[k]=JSON.parse(JSON.stringify(TPL0[k]));if(o.tpl[k]&&OLD[k]&&o.tpl[k][1]===OLD[k][1])o.tpl[k][1]=TPL0[k][1]});o.tp||='';o.pTpl||=PTPL0;o.fTpl||=FTPL0;o.plan=(o.plan&&typeof o.plan==='object')?{...PLAN0,...o.plan,rates:{...PLAN0.rates,...(o.plan.rates||{})}}:JSON.parse(JSON.stringify(PLAN0));o.set={absLimit:3,dueDay:15,contactDays:30,cycle:8,...(o.set||{})};o.teacher||='';fixCodes(o);return o}
+function load(){let r=null;try{r=localStorage.getItem(KEY);if(r){const parsed=JSON.parse(r);if(!valid(parsed))throw new Error('Saved data failed validation');return fix(parsed)}}catch(e){if(r){corrupt=true;storageBlocked=true;try{localStorage.setItem(KEY+'_corrupt',r)}catch(_){}}}return mem||seed()}
+function save(force=false){try{if(storageBlocked&&!force)throw new Error('Corrupt data is protected until recovery');localStorage.setItem(KEY,JSON.stringify(S));storageBlocked=false;corrupt=false;saveFailureNotice=false;$('#sf').style.display='none';mem=S;return true}catch(e){$('#sf').style.display='block';saveFailureNotice=true;mem=S;return false}}
+let S=load(),page='dash',msS='',msT='غياب طالب',msX=null;
+const G=id=>S.groups.find(g=>g.id===id),ST=id=>S.students.find(s=>s.id===id);
+const paid=b=>Math.round(b.pays.reduce((a,p)=>a+p.amt,0)*100)/100,bal=b=>Math.round((b.amount-paid(b))*100)/100;
+const per=()=>today().slice(0,7),perAr=p=>MN[+p.slice(5,7)-1]+' '+p.slice(0,4);
+const days=d=>Math.floor((new Date(today())-new Date(d))/864e5);
+const wa=(ph,m)=>`https://wa.me/20${ph.slice(1)}${m?'?text='+encodeURIComponent(m):''}`;
+function toast(m){if(saveFailureNotice&&!/^تعذّر|^تعذر|^فشل|^النسخة غير صالحة/.test(m)){m='تعذّر تأكيد حفظ البيانات محليًا. '+m+' · صدّر نسخة احتياطية أو عالج التخزين قبل الاعتماد على التغييرات.';saveFailureNotice=false}const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',3600)}
+const out=h=>$('#app').innerHTML=h;
+function openDlg(h){const d=$('#dlg');d.innerHTML=h;if(!d.open)d.showModal()}
+const closeDlg=()=>$('#dlg').close();
+function cf(m,fn){openDlg(`<p>${m}</p><div class="row"><button class="btn d" id="cy">تأكيد</button><button class="btn s" onclick="closeDlg()">إلغاء</button></div>`);$('#cy').onclick=()=>{closeDlg();fn()}}
+function addAct(sid,type,prio,due,notes,key){if(key&&S.actions.some(a=>a.key===key))return false;S.actions.push({id:uid(),sid,type,prio,due,notes:notes||'',status:'open',key});return true}
+function absN(sid){return S.sessions.filter(x=>x.rec[sid]==='absent').length}
+function needs(){
+ const r=[];S.students.filter(s=>s.status==='active').forEach(s=>{
+  const a=absN(s.id);if(a>=S.set.absLimit)r.push({s,why:`غياب متكرر (${a} مرات)`,act:'اتصل بولي الأمر',tpl:'تكرار الغياب',key:`n:abs:${s.id}:${a}`});
+  const b=S.bills.find(b=>b.sid===s.id&&b.period===per());if(b&&bal(b)>0&&+today().slice(8)>=S.set.dueDay)r.push({s,why:`متبقي ${bal(b)} ج لشهر ${perAr(per())}`,act:'ذكّر بالسداد',tpl:'تذكير بالسداد',key:`n:pay:${b.id}`});
+  if(s.nextDate&&s.nextDate<=today())r.push({s,why:`متابعة مستحقة: ${s.nextAction||'—'}`,act:'نفّذ المتابعة',tpl:'متابعة بعد تواصل سابق',key:`n:nx:${s.id}:${s.nextDate}`});
+  if(days(s.enrolled)>S.set.contactDays&&(!s.lastContact||days(s.lastContact)>S.set.contactDays))r.push({s,why:'لا تواصل منذ مدة',act:'تواصل لطمأنة ولي الأمر',tpl:'رسالة عامة لولي الأمر',key:`n:ct:${s.id}`})});
+ return r}
+const showMsg=(sid,t)=>{msS=sid;msT=t;msX=null;page='msg';shell()};
+
+/* ---------- shell ---------- */
+function shell(){FLOW.on=false;
+ const T=[['dash','الرئيسية'],['students','الطلاب'],['att','الحضور'],['pay','الاشتراكات'],['msg','مركز الرسائل'],['acts','المتابعات'],['rep','التقارير'],['groups','المجموعات'],['data','النسخ الاحتياطي'],['prospects','المستهدفون'],['sett','الإعدادات']];
+ $('#nav').innerHTML=T.map(t=>`<button class="${page===t[0]?'on':''}" onclick="page='${t[0]}';shell()">${t[1]}</button>`).join('');
+ ({dash,students,att,pay,msg,acts,rep,groups,data,prospects,sett})[page]();$('#hw').href=S.tp?wa(S.tp):'#';$('#hw').style.display=S.tp?'':'none';$('#bn').textContent=(S.teacher?S.teacher+' · ':'')+'من الفوضى إلى النظام';
+ const gi=TABG.findIndex(g=>g.pages.some(p=>p[0]===page));if(gi>=0)lastPg[TABG[gi].k]=page;
+ const nTask=flowSteps().filter(x=>x.n>0).length;
+ $('#bar').innerHTML=TABG.map((g,k)=>`<button class="${gi===k?'on':''}" onclick="tabGo('${g.k}')"><b>${g.ic}</b>${g.t}${g.k==='today'&&nTask?`<i class="bg">${nTask}</i>`:''}</button>`).join('')+`<button class="${gi<0?'on':''}" onclick="more()"><b>⋯</b>المزيد</button>`;
+ const sp=gi>=0?TABG[gi].pages:MORE;$('#sub').className=sp.length>1?'on':'';$('#sub').innerHTML=sp.length>1?sp.map(p=>`<button class="${page===p[0]?'on':''}" onclick="page='${p[0]}';shell()">${p[1]}</button>`).join(''):'';
+ window.scrollTo(0,0)}
+const TABG=[{k:'today',ic:'🏠',t:'اليوم',pages:[['dash','الرئيسية'],['att','الحضور'],['acts','المتابعات']]},{k:'stu',ic:'👥',t:'الطلاب',pages:[['students','الطلاب'],['groups','المجموعات'],['msg','الرسائل']]},{k:'pro',ic:'🎯',t:'المستهدفون',pages:[['prospects','المستهدفون']]},{k:'fin',ic:'💰',t:'الفلوس',pages:[['pay','الاشتراكات'],['rep','التقارير']]}];
+const MORE=[['data','النسخ الاحتياطي'],['sett','الإعدادات']];let lastPg={};
+function tabGo(k){const g=TABG.find(x=>x.k===k);page=lastPg[k]||g.pages[0][0];shell()}
+function more(){openDlg('<h3>المزيد</h3>'+MORE.map(t=>`<button class="btn s" style="width:100%;margin-bottom:8px" onclick="closeDlg();page='${t[0]}';shell()">${t[1]}</button>`).join('')+'<button class="btn" style="width:100%" onclick="closeDlg()">إغلاق</button>')}
+function csvDlg(rows){const t='\ufeff'+rows.map(x=>x.map(c=>{c=typeof c==='string'&&/^[=+\-@\t\r]/.test(c)?"'"+c:c;return '"'+String(c??'').replace(/"/g,'""')+'"'}).join(',')).join('\n');openDlg(`<h3>CSV</h3><p class="mu">انسخ النص والصقه في ملف .csv (التنزيل المباشر غير متاح داخل الصفحة).</p><textarea rows="8" readonly onclick="this.select()">${esc(t)}</textarea><br><br><button class="btn s" onclick="closeDlg()">إغلاق</button>`)}
+
+/* ---------- dashboard ---------- */
+function dash(){
+ const act=S.students.filter(s=>s.status==='active'),p=per(),dn=DN[new Date().getDay()];
+ const ts=S.sessions.filter(x=>x.date===today());let pr=0,ab=0;ts.forEach(x=>Object.values(x.rec).forEach(v=>v==='absent'?ab++:v!=='excused'&&pr++));
+ const bp=S.bills.filter(b=>b.period===p),due=bp.filter(b=>bal(b)>0);
+ const col=S.bills.reduce((a,b)=>a+b.pays.filter(x=>x.date.startsWith(p)).reduce((c,x)=>c+x.amt,0),0);
+ const rem=S.bills.reduce((a,b)=>a+bal(b),0),nd=needs(),od=S.actions.filter(a=>a.status==='open'&&a.due<today()).length;
+ out(`${corrupt?'<div class="warn">تعذّر قراءة البيانات المحفوظة؛ حُفظت نسخة خام منها (انظر صفحة النسخ الاحتياطي). لا تضف بيانات قبل نسخها.</div>':''}${[...S.students,...S.groups].some(x=>x.demo)?'<div class="warn">توجد سجلات تجريبية خيالية. <button class="btn s" onclick="clrDemo()">حذف السجلات التجريبية فقط</button></div>':''}
+ ${(S.students.some(x=>!x.demo)||S.prospects.length)&&(!S.lastBackup||days(S.lastBackup)>7)?'<div class="warn">آخر نسخة احتياطية: '+(S.lastBackup||'لم تؤخذ بعد')+'. البيانات على هذا الجهاز فقط. <button class="btn s" onclick="bkp()">خذ نسخة الآن</button></div>':''}<h2>لوحة التحكم</h2>${onbBlock()}${todayBlock()}<h3>الأرقام</h3><div class="grid">
+ ${[[act.length,'طلاب نشطون',''],[act.filter(s=>s.enrolled.startsWith(p)).length,'طلاب جدد هذا الشهر',''],[S.groups.filter(g=>na(g.days).includes(na(dn))).length,'حصص اليوم ('+dn+')',''],[pr+' / '+ab,'حضور / غياب اليوم',''],[act.filter(s=>absN(s.id)>=S.set.absLimit).length,'كثيرو الغياب','bad'],[due.length,'اشتراكات مستحقة','wn'],[col,'محصّل هذا الشهر (ج)','ok'],[rem,'إجمالي المتبقي (ج)','bad'],[nd.length,'يحتاجون تدخلك','wn'],[od,'متابعات متأخرة','bad']].map(c=>`<div class="card"><div class="k ${c[2]}">${c[0]}</div><div class="mu">${c[1]}</div></div>`).join('')}</div>
+ <h3>محتاجين تدخلك النهارده</h3>${nd.length?nd.map(n=>`<div class="card"><b>${esc(n.s.name)}</b> <span class="tag">${esc(n.why)}</span><div class="mu">الإجراء المقترح: ${n.act}</div><div class="row" style="margin-top:6px"><button class="btn" onclick="showMsg('${n.s.id}','${n.tpl}')">جهّز رسالة</button><a class="btn s" target="_blank" rel="noopener" href="${wa(n.s.pphone)}">واتساب ولي الأمر</a></div></div>`).join(''):'<div class="empty">لا يوجد ما يحتاج تدخلك الآن.</div>'}`);
+}
+
+function clrDemo(){const dg_=S.groups.filter(g=>g.demo).map(g=>g.id);
+ if(S.students.some(x=>!x.demo&&dg_.includes(x.gid))){toast('انقل الطلاب الحقيقيين إلى مجموعة حقيقية أولًا');return}
+ cf('حذف الطلاب والمجموعات التجريبية وكل سجلاتهم؟ بياناتك الحقيقية لن تُمس.',()=>{const ds=S.students.filter(x=>x.demo).map(x=>x.id);
+ S.students=S.students.filter(x=>!x.demo);S.groups=S.groups.filter(g=>!g.demo);S.sessions=S.sessions.filter(x=>!dg_.includes(x.gid));
+ S.bills=S.bills.filter(b=>!ds.includes(b.sid));S.log=S.log.filter(l=>!ds.includes(l.sid));S.actions=S.actions.filter(a=>!ds.includes(a.sid));save();shell()})}
+/* ---------- students ---------- */
+let q='',fg='',fs='active';let SN=30;
+function students(){const rc=riskCtx();
+ const l=S.students.filter(s=>(!q||na(s.name).includes(na(q))||codeMatch(s,q)||s.phone.includes(nph(q))||s.pphone.includes(nph(q)))&&(!fg||s.gid===fg)&&(!fs||s.status===fs));
+ out(`<h2>الطلاب (${l.length})</h2><div class="card"><div class="row"><input id="q" placeholder="بحث بالاسم أو الهاتف أو الكود" value="${esc(q)}"><select id="fg"><option value="">كل المجموعات</option>${S.groups.map(g=>`<option value="${g.id}" ${fg===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select><select id="fs"><option value="">الكل</option><option value="active" ${fs==='active'?'selected':''}>نشط</option><option value="archived" ${fs==='archived'?'selected':''}>مؤرشف</option></select><button class="btn" onclick="sForm()">+ طالب</button><button class="btn s" onclick="sBulk()">+ عدة طلاب</button><button class="btn s" onclick="monthQ()">تقرير الشهر (${monthList().length})</button><button class="btn s" onclick="riskQ()">في خطر (${riskList().length})</button></div></div>
+ <div class="card tw rs">${l.length?`<table><tr><th>الاسم</th><th>ولي الأمر</th><th>المجموعة</th><th>حصص الشهر / ${cyc()}</th><th></th></tr>${l.slice(0,SN).map(s=>`<tr><td>${esc(s.name)}${riskTag(s,rc)}<div class="mu" dir="ltr" style="text-align:right">${esc(s.code||'')}</div></td><td>${esc(s.parent||'ولي الأمر')}<div><a href="tel:${esc(s.pphone)}" dir="ltr">${esc(s.pphone||'لا يوجد رقم')}</a></div></td><td>${esc(G(s.gid)?.name||'—')}</td><td>${(()=>{const n=sesN(s.id),C=cyc();return `<span class="${n>C?'bad':n>=C?'ok':''}">${n}/${C}</span>${n>C?' <span class="bad">تجاوز الحد</span>':n===C?' <span class="ok">جاهز للتجديد</span>':''}`})()}</td><td><div class="row" style="gap:5px;margin-bottom:6px"><button class="btn s" onclick="showMsg('${s.id}','رسالة عامة لولي الأمر')">💬 مراسلة ولي الأمر · ${esc(s.pphone||'بدون رقم')}</button><button class="btn" onclick="showMsg('${s.id}','رسالة خاصة للطالب')">🎓 مراسلة الطالب · ${esc(s.phone||'بدون رقم')}</button></div><button class="btn s" onclick="prof('${s.id}')">ملف</button> <button class="btn s" onclick="sForm('${s.id}')">تعديل</button> <button class="btn s" onclick="arch('${s.id}')">${s.status==='active'?'أرشفة':'استعادة'}</button><button class="btn s" onclick="sCard('${s.id}')">كارت الكود</button>${glink(G(s.gid))?` <button class="btn s" onclick="showMsg('${s.id}','دعوة جروب المجموعة')">دعوة الجروب</button>`:''} <button class="btn d" onclick="delStudent('${s.id}')">حذف</button></td></tr>`).join('')}</table>${l.length>SN?`<button class="btn s" style="margin-top:8px" onclick="SN+=30;students()">عرض المزيد (${l.length-SN})</button>`:''}`:'<div class="empty">لا يوجد طلاب مطابقون. أضف مجموعة ثم طالبًا.</div>'}</div>`);
+ $('#q').oninput=e=>{q=e.target.value;SN=30;const p=e.target.selectionStart;students();$('#q').focus();$('#q').setSelectionRange(p,p)};
+ $('#fg').onchange=e=>{fg=e.target.value;SN=30;students()};$('#fs').onchange=e=>{fs=e.target.value;SN=30;students()};
+}
+function arch(id){const s=ST(id);const f=()=>{s.status=s.status==='active'?'archived':'active';save();students()};s.status==='active'?cf('أرشفة الطالب؟ سجلاته تبقى محفوظة.',f):f()}
+function sForm(id){
+ const s=id?ST(id):{name:'',phone:'',parent:'',pphone:'',gid:S.groups[0]?.id||'',fee:S.groups[0]?.fee||0,notes:'',lastContact:'',nextAction:'',nextDate:''};
+ const f=(i,l,v,t='text')=>`<label>${l}</label><input id="${i}" type="${t}" value="${esc(v)}">`;
+ openDlg(`<h3>${id?'تعديل طالب':'طالب جديد'}</h3>${f('f1','الاسم الكامل *',s.name)}${f('f2','هاتف الطالب',s.phone)}${f('f3','اسم ولي الأمر *',s.parent)}${f('f4','هاتف ولي الأمر * (01xxxxxxxxx)',s.pphone)}
+ <label>المجموعة *</label><select id="f5">${S.groups.map(g=>`<option value="${g.id}" ${s.gid===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select>${f('f6','الاشتراك الشهري (ج)',s.fee,'number')}${f('f7','ملاحظات',s.notes)}${f('f8','تاريخ آخر تواصل',s.lastContact,'date')}${f('f9','الإجراء التالي',s.nextAction)}${f('f10','تاريخ الإجراء',s.nextDate,'date')}
+ <div id="er" class="bad"></div><br><div class="row"><button class="btn" id="sv">حفظ</button><button class="btn s" onclick="closeDlg()">إلغاء</button></div>`);
+ $('#sv').onclick=()=>{
+  const v={name:$('#f1').value.trim(),phone:nph($('#f2').value),parent:$('#f3').value.trim(),pphone:nph($('#f4').value),gid:$('#f5').value,fee:+$('#f6').value||0,notes:$('#f7').value,lastContact:$('#f8').value,nextAction:$('#f9').value,nextDate:$('#f10').value};
+  let e='';if(!v.name)e='الاسم مطلوب';else if(!v.parent)e='اسم ولي الأمر مطلوب';else if(!PH.test(v.pphone))e='هاتف ولي الأمر غير صحيح';else if(v.phone&&!PH.test(v.phone))e='هاتف الطالب غير صحيح';else if(!v.gid)e='أنشئ مجموعة أولًا';
+  if(e){$('#er').textContent=e;return}
+  const go=()=>{if(id)Object.assign(ST(id),v);else S.students.push({id:uid(),code:newCode(S.codes,'MH-',5),status:'active',enrolled:today(),...v});save();closeDlg();toast('تم الحفظ');students()};
+  const d=S.students.find(x=>x.id!==id&&(x.name===v.name||x.pphone===v.pphone&&x.name.split(' ')[0]===v.name.split(' ')[0]));
+  d?cf('يوجد طالب مشابه: '+esc(d.name)+'. حفظ على أي حال؟',go):go();
+ };
+}
+function prof(id){
+ const s=ST(id),ev=[];
+ S.sessions.forEach(x=>x.rec[id]&&ev.push([x.date,'حضور: '+AR[x.rec[id]]]));
+ S.bills.filter(b=>b.sid===id).forEach(b=>b.pays.forEach(p=>ev.push([p.date,`دفعة ${p.amt} ج (${p.method}) عن ${perAr(b.period)}`])));
+ S.log.filter(l=>l.sid===id).forEach(l=>ev.push([l.date.slice(0,10),`رسالة «${l.type}» — ${SL[l.status]}`]));
+ S.actions.filter(a=>a.sid===id).forEach(a=>ev.push([a.due,`إجراء: ${a.type} (${({done:'تم',cancelled:'ملغي'})[a.status]||'مفتوح'})`]));
+ ev.sort((a,b)=>b[0].localeCompare(a[0]));
+ openDlg(`<h3>${esc(s.name)}</h3><div class="mu">كود: ${esc(s.code||'')}${s.fcode?' · تذكرة الجمعة '+esc(s.fcode):''} · ${esc(G(s.gid)?.name||'')}<br>${(()=>{const k=riskOf(s),f=refsOf(s.code);return (k.reasons.length?'مؤشر الخطر '+k.score+': '+esc(k.reasons.join(' · ')):'لا مؤشرات خطر')+(s.refBy?' · جاء بإحالة '+esc(s.refBy):'')+(f.done||f.pend?' · أحال '+f.done+' واشترك، '+f.pend+' قيد المتابعة':'')})()}<br>تواصل أخير: ${s.lastContact||'—'} · التالي: ${esc(s.nextAction)||'—'} ${s.nextDate||''}<br>${esc(s.notes)}</div><h3>السجل الزمني</h3>${ev.length?ev.map(e=>`<div class="mu">${e[0]} · <span style="color:var(--tx)">${esc(e[1])}</span></div>`).join(''):'<div class="empty">لا أحداث بعد.</div>'}<br><button class="btn s" onclick="closeDlg()">إغلاق</button>`);
+}
+
+
+/* ---------- prospects / enrollment funnel ---------- */
+let pq='', pf='', PL=50, pdue=false;
+const PST={new:'رقم جديد',contacted:'تم التواصل',interested:'مهتم',booked:'حجز الجمعة',attended:'حضر الجمعة',converted:'اشترك',notinterested:'غير مهتم',stop:'عدم تواصل'};
+function prospects(){
+ const list=pList();
+ const counts=Object.fromEntries(Object.keys(PST).map(k=>[k,S.prospects.filter(p=>p.stage===k).length]));
+ out(`<h2>المستهدفون والتحويل إلى طلاب</h2><div class="grid">${[['إجمالي الأرقام',S.prospects.length],['مهتمون',counts.interested],['حجوزات الجمعة',counts.booked],['حضروا الجمعة',counts.attended],['اشتركوا',counts.converted]].map(x=>`<div class="card"><div class="k">${x[1]}</div><div class="mu">${x[0]}</div></div>`).join('')}</div>
+ <div class="warn">أضف الأرقام التي لديك صلاحية للتواصل معها، واحترم طلب عدم التواصل. لا ترسل رسائل جماعية غير مرغوبة ولا تستخدم ندرة أو أعدادًا غير حقيقية.</div>
+ <div class="card"><div class="row"><input id="pq" placeholder="بحث برقم الهاتف أو الاسم" value="${esc(pq)}"><select id="pf"><option value="">كل المراحل</option>${Object.entries(PST).map(([k,v])=>`<option value="${k}" ${pf===k?'selected':''}>${v}</option>`).join('')}</select><button class="btn" onclick="pProsForm()">+ رقم مستهدف</button><button class="btn s" onclick="pImport()">استيراد أرقام</button><button class="btn" onclick="pPlan()">خطة الاستهداف</button><button class="btn s" onclick="qFollow()">متابعات وتذكيرات (${remList().length+followList().length})</button><button class="btn ${pdue?'':'s'}" onclick="pdue=!pdue;PL=50;prospects()">المتابعات المستحقة (${S.prospects.filter(pDue).length})</button><button class="btn s" onclick="qReplies()">الردود (${qPend().length})</button><button class="btn" onclick="pQueue()">طابور الرسائل (${S.prospects.filter(p=>p.stage==='new'&&!p.qskip&&!(p.history||[]).some(h=>h.channel==='whatsapp')).length})</button><button class="btn s" onclick="pFriday()">حملات الجمعة</button><button class="btn d" onclick="delProspectsList()">حذف القائمة الحالية (${list.length})</button></div></div>
+ ${list.length?list.slice(0,PL).map(p=>`<div class="card"><b>${esc(p.name||'اسم غير معروف')}</b> <span class="tag">${esc(PST[p.stage]||p.stage)}</span><div class="mu">${esc(p.phone)} · ${esc(p.grade||'الصف غير محدد')} · ${esc(p.center||p.area||'المصدر غير محدد')}</div><div class="mu">آخر تواصل: ${esc(p.lastContact||'—')} · المتابعة: ${esc(p.nextDate||'—')} · ${esc(p.notes||'')}${p.ticket?' · تذكرة '+esc(p.ticket):''}${p.studentCode?' · كود الطالب '+esc(p.studentCode):''}</div><div class="row" style="margin-top:8px"><button class="btn s" onclick="pCall('${p.id}')">اتصال وتسجيل النتيجة</button><button class="btn" onclick="pMsg('${p.id}')">واتساب</button><button class="btn s" onclick="pProsForm('${p.id}')">تعديل / نتيجة</button><button class="btn s" onclick="pConvert('${p.id}')">تحويل لطالب</button><button class="btn s" onclick="pHistory('${p.id}')">سجل التواصل</button><button class="btn d" onclick="delProspect('${p.id}')">حذف</button></div></div>`).join('')+(list.length>PL?`<button class="btn s" onclick="PL+=50;prospects()">عرض المزيد (${list.length-PL})</button>`:''):'<div class="empty">لا توجد أرقام في هذه القائمة.</div>'}
+ <div class="card"><h3>قمع التحويل</h3><div class="mu">رقم جديد ← تواصل ← اهتمام ← حجز الجمعة ← حضور ← اشتراك.</div><div class="row"><div>معدل حضور الجمعة: <b>${counts.booked?Math.round(counts.attended/counts.booked*100):0}%</b></div><div>تحويل الحضور لاشتراك: <b>${counts.attended?Math.round(counts.converted/counts.attended*100):0}%</b></div></div></div>`);
+ $('#pq').oninput=e=>{pq=e.target.value;PL=50;const pos=e.target.selectionStart;prospects();$('#pq').focus();$('#pq').setSelectionRange(pos,pos)};$('#pf').onchange=e=>{pf=e.target.value;PL=50;prospects()};
+}
+function pProsForm(id){
+ const p=id?S.prospects.find(x=>x.id===id):{phone:'',name:'',grade:'',center:'',source:'',stage:'new',notes:'',nextDate:'',parentPhone:''};
+ openDlg(`<h3>${id?'تحديث المستهدف':'إضافة رقم مستهدف'}</h3><label>رقم الهاتف *</label><input id="pph" type="tel" value="${esc(p.phone)}" placeholder="01xxxxxxxxx"><label>الاسم (إن عُرف)</label><input id="pn" value="${esc(p.name||'')}"><label>الصف</label><select id="pg"><option value="">غير معروف</option>${['الأول الإعدادي','الثاني الإعدادي','الثالث الإعدادي','الأول الثانوي','الثاني الثانوي','الثالث الثانوي','أولى بكالوريا','تانية بكالوريا','أخرى'].map(x=>`<option ${p.grade===x?'selected':''}>${x}</option>`).join('')}</select><label>رقم ولي الأمر (إن توفر)</label><input id="ppar" type="tel" value="${esc(p.parentPhone||'')}"><label>السنتر / المنطقة</label><input id="pc" value="${esc(p.center||'')}"><label>مصدر الرقم</label><input id="ps" value="${esc(p.source||'')}"><label>كود الطالب الذي أحاله (اختياري)</label><input id="pref" dir="ltr" placeholder="MH-XXXXX" value="${esc(p.refCode||'')}"><label>مرحلة المتابعة</label><select id="pst">${Object.entries(PST).map(([k,v])=>`<option value="${k}" ${p.stage===k?'selected':''}>${v}</option>`).join('')}</select><label>موعد المتابعة</label><input id="pnd" type="date" value="${esc(p.nextDate||'')}"><label>ملاحظات / نتيجة آخر تواصل</label><textarea id="pno" rows="3">${esc(p.notes||'')}</textarea><div id="perr" class="bad"></div><br><div class="row"><button class="btn" id="psv">حفظ</button><button class="btn s" onclick="closeDlg()">إلغاء</button></div>`);
+ $('#psv').onclick=()=>{const phone=nph($('#pph').value);if(!PH.test(phone)){$('#perr').textContent='اكتب رقم هاتف مصري صحيحًا';return}const dup=S.prospects.find(x=>x.id!==id&&nph(x.phone)===phone);if(dup){$('#perr').textContent='الرقم موجود بالفعل ضمن المستهدفين.';return}
+ const parentPhone=nph($('#ppar').value);if(parentPhone&&!PH.test(parentPhone)){$('#perr').textContent='رقم ولي الأمر غير صحيح';return}const rcN=normCode($('#pref').value);let rcode='';if(rcN){const rs=S.students.find(x=>codeKey(x.code)===rcN);if(!rs){$('#perr').textContent='كود الطالب المُحيل غير موجود';return}rcode=rs.code}
+ const v={phone,name:$('#pn').value.trim(),grade:$('#pg').value,parentPhone,center:$('#pc').value.trim(),source:$('#ps').value.trim()||(rcode?'إحالة طالب':''),refCode:rcode,stage:$('#pst').value,nextDate:$('#pnd').value,notes:$('#pno').value.trim()};
+ if(id)Object.assign(p,v);else S.prospects.push({id:uid(),...v,created:today(),history:[]});save();closeDlg();toast('تم حفظ بيانات المستهدف');prospects()};
+}
+function pImport(){openDlg(`<h3>استيراد أرقام</h3><p class="mu">ألصق الأرقام، رقم في كل سطر (أو مفصولة بفاصلة). تُقبل الأرقام بمسافات أو شرطات أو +20 أو أرقام عربية، ويُتجاهل المكرر. أضف فقط أرقامًا مسموحًا لك بالتواصل معها.</p><label>الصف لهذه الدفعة</label><select id="pig"><option value="">غير معروف</option>${['الأول الإعدادي','الثاني الإعدادي','الثالث الإعدادي','الأول الثانوي','الثاني الثانوي','الثالث الثانوي','أولى بكالوريا','تانية بكالوريا','أخرى'].map(x=>`<option>${x}</option>`).join('')}</select><label>مصدر الأرقام</label><input id="pis" placeholder="مثال: سنتر النور"><textarea id="pimp" rows="8" placeholder="01012345678&#10;011 1234 5678"></textarea><div id="pimerr" class="bad"></div><br><button class="btn" id="pimgo">استيراد</button> <button class="btn s" onclick="closeDlg()">إلغاء</button>`);
+ $('#pimgo').onclick=()=>{const grade=$('#pig').value,src=$('#pis').value.trim()||'استيراد يدوي';const seen=new Set(S.prospects.map(p=>nph(p.phone)));let added=0,invalid=0,dupes=0;const bad=[];
+  const take=ph=>{if(seen.has(ph)){dupes++;return}seen.add(ph);S.prospects.push({id:uid(),phone:ph,name:'',grade,center:'',source:src,stage:'new',notes:'',nextDate:'',created:today(),history:[]});added++};
+  $('#pimp').value.split(/[\n,;]+/).forEach(raw=>{const t=raw.trim();if(!t)return;const one=nph(t);if(PH.test(one)){take(one);return}const parts=dg(t).split(/\s+/).map(nph).filter(Boolean);if(parts.length>1&&parts.every(x=>PH.test(x))){parts.forEach(take);return}invalid++;if(bad.length<3)bad.push(t.slice(0,18))});
+  if(!added&&!dupes&&!invalid){$('#pimerr').textContent='لا توجد أرقام للاستيراد';return}
+  save();closeDlg();PL=50;toast(`أُضيف ${added} · مكرر ${dupes} · غير صالح ${invalid}${bad.length?' ('+bad.join(' | ')+')':''}`);prospects()};
+}
+function qFill(p){return (S.pTpl||PTPL0).split('[الصف]').join(p.grade||'الصف الدراسي').split('[الاسم]').join(p.name||'').split('[اسم المدرس]').join(S.teacher||'')}
+function qTpl(){openDlg(`<h3>قالب رسالة الطابور</h3><p class="mu">المتغيرات: [الصف] [الاسم] [اسم المدرس]</p><textarea id="qte" rows="7">${esc(S.pTpl||PTPL0)}</textarea><br><br><div class="row"><button class="btn" id="qts">حفظ</button><button class="btn s" onclick="pQueue()">رجوع</button></div>`);$('#qts').onclick=()=>{S.pTpl=$('#qte').value.trim()||PTPL0;save();pQueue()}}
+function qPend(){return S.prospects.filter(p=>['new','contacted'].includes(p.stage)&&p.rchk!==today()&&(p.history||[]).some(h=>h.channel==='whatsapp'))}
+const QR={reply:['رد (بدون قرار)','contacted','تم الرد'],interested:['مهتم','interested','مهتم'],no:['غير مهتم','notinterested','غير مهتم'],stop:['عدم تواصل','stop','طلب عدم التواصل'],noreply:['لا رد بعد',null,'لا يوجد رد']};
+function qRes(id,k){const p=S.prospects.find(x=>x.id===id),r=QR[k];if(!p||!r)return;p.history=p.history||[];p.history.push({date:new Date().toISOString(),channel:'reply',result:r[2],nextDate:''});if(r[1]){p.stage=r[1];p.lastContact=today()}else p.rchk=today();save();qReplies()}
+function qReplies(){
+ const q=qPend(),p=q[0];
+ if(!p){if(FLOW.on){flowNext();return}openDlg('<h3>الردود</h3><div class="empty">لا أرقام بانتظار تسجيل رد. الأرقام المسجل «لا رد» لها تظهر غدًا.</div><br><div class="row"><button class="btn s" onclick="pQueue()">رجوع للإرسال</button><button class="btn s" onclick="closeDlg();shell()">إغلاق</button></div>');return}
+ const last=(p.history||[]).filter(h=>h.channel==='whatsapp').pop()||{};
+ openDlg(`${stepTag()}<h3>تسجيل الردود · متبقي ${q.length}</h3><div class="mu">افتح المحادثة في واتساب، ثم سجّل النتيجة.</div><div class="card"><b>${esc(p.phone)}</b> <span class="mu">${esc(p.grade||'')} ${esc(p.name||'')}</span><div class="mu">جُهزت: ${esc(String(last.date||'').slice(0,10))}</div><div class="mu">${esc(String(last.text||'').slice(0,90))}</div><a class="btn s" style="margin-top:6px" target="_blank" rel="noopener" href="https://wa.me/2${esc(p.phone)}">فتح المحادثة</a></div><div class="row" style="margin-top:8px">${Object.entries(QR).map(([k,v])=>`<button class="btn ${k==='stop'||k==='no'?'d':k==='noreply'?'s':''}" onclick="qRes('${p.id}','${k}')">${v[0]}</button>`).join('')}</div><br><div class="row"><button class="btn s" onclick="pQueue()">رجوع للإرسال</button><button class="btn s" onclick="closeDlg();shell()">إغلاق</button></div>`)}
+function pQueue(){
+ const q=S.prospects.filter(p=>p.stage==='new'&&!p.qskip&&!(p.history||[]).some(h=>h.channel==='whatsapp'));
+ const n=S.prospects.reduce((a,p)=>a+(p.history||[]).filter(h=>h.channel==='whatsapp'&&String(h.date||'').slice(0,10)===today()).length,0);
+ const p=q[0];
+ if(FLOW.on&&(!p||n>=S.plan.daily)){flowNext();return}
+ if(!p){openDlg('<h3>طابور الرسائل</h3><div class="empty">لا أرقام جديدة بانتظار رسالة.</div><br><div class="row"><button class="btn" onclick="qReplies()">الردود (${qPend().length})</button><button class="btn s" onclick="closeDlg();shell()">إغلاق</button></div>');return}
+ openDlg(`${stepTag()}<h3>طابور الرسائل · متبقي ${q.length}</h3><div class="mu">جُهّز اليوم: ${n} من ${S.plan.daily}${n>=S.plan.daily?' · وصلت لحصة اليوم':''}</div>${n>=50?'<div class="warn">أرسلت أكثر من 50 رسالة اليوم. واتساب قد يقيّد الحسابات التي ترسل لعدد كبير من أرقام غير محفوظة؛ الأفضل التوزيع على عدة أيام وعدم التكرار.</div>':''}<div class="card"><b>${esc(p.phone)}</b> <span class="mu">${esc(p.grade||'')} ${esc(p.source||'')}</span></div><label>الرسالة (يمكن تعديلها لهذا الرقم فقط)</label><textarea id="qt" rows="6">${esc(qFill(p))}</textarea><div class="row" style="margin-top:8px"><a class="btn" id="qw" target="_blank" rel="noopener" href="https://wa.me/2${esc(p.phone)}?text=${encodeURIComponent(qFill(p))}">فتح واتساب</a><button class="btn s" id="qk">تخطي</button><button class="btn s" onclick="qReplies()">الردود (${qPend().length})</button><button class="btn s" onclick="qTpl()">القالب</button><button class="btn s" onclick="closeDlg();shell()">إغلاق</button></div><div class="mu" style="margin-top:6px">يُسجَّل «رسالة مجهزة» فقط؛ لا إرسال تلقائي، وأنت من تضغط إرسال داخل واتساب.</div>`);
+ $('#qt').oninput=e=>{$('#qw').href='https://wa.me/2'+p.phone+'?text='+encodeURIComponent(e.target.value)};
+ $('#qk').onclick=()=>{p.qskip=true;save();pQueue()};
+ $('#qw').onclick=e=>{if(!navigator.onLine){e.preventDefault();toast('واتساب يحتاج إنترنت');return}p.history=p.history||[];p.history.push({date:new Date().toISOString(),channel:'whatsapp',text:$('#qt').value,result:'رسالة مجهزة (طابور)',nextDate:''});p.lastContact=today();save();setTimeout(pQueue,400)};
+}
+function pCall(id){const p=S.prospects.find(x=>x.id===id);if(!p||p.stage==='stop'){toast('هذا الرقم مضبوط على عدم التواصل');return}
+ openDlg(`<h3>تسجيل مكالمة</h3><div class="mu">الرقم: ${esc(p.phone)}. سيتم فتح تطبيق الهاتف بعد حفظ النتيجة؛ التطبيق لا يستطيع معرفة نتيجة المكالمة تلقائيًا.</div><label>نتيجة المكالمة</label><select id="pcr"><option value="noanswer">لم يرد</option><option value="answered">رد</option><option value="interested">مهتم</option><option value="booked">حجز حصة الجمعة</option><option value="notinterested">غير مهتم</option><option value="stop">طلب عدم التواصل</option></select><label>ملاحظات المكالمة</label><textarea id="pcn" rows="3"></textarea><label>موعد المتابعة</label><input id="pcd" type="date"><br><br><button class="btn" id="pcgo">حفظ وفتح الاتصال</button> <button class="btn s" onclick="closeDlg()">إلغاء</button>`);
+ $('#pcgo').onclick=()=>{const res=$('#pcr').value,note=$('#pcn').value.trim(),next=$('#pcd').value;const labels={noanswer:'اتصال: لم يرد',answered:'اتصال: رد',interested:'اتصال: مهتم',booked:'اتصال: حجز حصة الجمعة',notinterested:'اتصال: غير مهتم',stop:'طلب عدم التواصل'};p.history=p.history||[];p.history.push({date:new Date().toISOString(),channel:'phone',result:labels[res],notes:note,nextDate:next});p.lastContact=today();if(note)p.notes=(p.notes?p.notes+' | ':'')+note;if(next)p.nextDate=next;if(res==='interested')p.stage='interested';if(res==='booked')p.stage='booked';if(res==='notinterested')p.stage='notinterested';if(res==='stop')p.stage='stop';if(res==='answered'&&p.stage==='new')p.stage='contacted';save();closeDlg();if(navigator.onLine)window.location.href='tel:'+p.phone;else toast('تم تسجيل المكالمة؛ الاتصال يحتاج شبكة');prospects()}}
+const SMART_MSGS = {
+ 'أولى بكالوريا': {
+  'الطالب': {
+   'رقم جديد': 'أهلًا [الاسم] 👋 معاك من فريق مستر [اسم المدرس]. إنت في أولى بكالوريا السنة دي؟ بنساعد الطلاب يبدأوا الفلسفة والمنطق بخطوات واضحة. رد بـ «أيوه» أو «لأ» عشان أوجّهك للمعلومة المناسبة.',
+   'لم يرد': 'خليني أسألك سؤال سريع يا [الاسم] 👌 في الفلسفة والمنطق، إيه اللي محتاج مساعدة فيه أكتر؟ 1️⃣ فهم الدرس 2️⃣ حل الأسئلة 3️⃣ تنظيم المذاكرة. ابعت رقم الاختيار بس.',
+   'مهتم': 'تمام يا [الاسم] 🙌 عشان أقولك أنسب خطوة، إنت بدأت تذاكر فلسفة ومنطق ولا لسه بتجهّز من البداية؟',
+   'طلب التفاصيل': 'أكيد يا [الاسم]. تحب تعرف الأول مواعيد ومكان الحضور، ولا نظام الشرح والتدريب على الأسئلة؟ رد بـ «المواعيد» أو «نظام الشرح».',
+   'حجز/حضور': 'أهلًا [الاسم] 👋 هل يناسبك نراجع معاك تفاصيل الحضور لمجموعة الفلسفة والمنطق؟ رد بـ «ابعت التفاصيل» أو «وقت تاني».'
+  },
+  'ولي الأمر': {
+   'رقم جديد': 'أهلًا بحضرتك، معاك من فريق مستر [اسم المدرس]. هل ابنك/بنتك في أولى بكالوريا؟ بنقدّم شرحًا للفلسفة والمنطق مع تدريب على فهم الأسئلة. لو حضرتك تأكدلنا المرحلة نرسل التفاصيل المناسبة.',
+   'لم يرد': 'مساء الخير يا فندم، متابعة بسيطة بخصوص الفلسفة والمنطق لأولى بكالوريا. هل تحبوا نرسل مواعيد ومكان المجموعات المتاحة؟ ممكن الرد بـ «نعم» أو «لاحقًا».',
+   'مهتم': 'أهلًا بحضرتك، عشان نوضح لحضرتك المناسب للطالب: هل الأولوية عنده فهم الدروس، ولا التدريب على حل الأسئلة؟ اختيار حضرتك يساعدنا نرسل التفاصيل المفيدة فقط.',
+   'طلب التفاصيل': 'تحت أمرك يا فندم. تحبوا نبدأ بتفاصيل المواعيد والمكان، ولا نظام الشرح والمتابعة؟ ردوا بـ «المواعيد» أو «النظام».',
+   'حجز/حضور': 'أهلًا بحضرتك، بنراجع مع حضرتك تفاصيل حضور الطالب لمجموعة الفلسفة والمنطق. هل الموعد الذي تم الاتفاق عليه ما زال مناسبًا؟'
+  }
+ },
+ 'تانية بكالوريا': {
+  'الطالب': {
+   'رقم جديد': 'أهلًا [الاسم] 👋 معاك من فريق مستر [اسم المدرس]. إنت في تانية بكالوريا السنة دي؟ بنساعد طلاب علم النفس يفهموا الأفكار وينظّموا المذاكرة والتدريب على الأسئلة. رد بـ «أيوه» أو «لأ».',
+   'لم يرد': 'سؤال سريع يا [الاسم] 🤔 في علم النفس، إيه اللي بيحتاج مجهود أكتر بالنسبة لك؟ 1️⃣ فهم المفاهيم 2️⃣ تذكّر المعلومات 3️⃣ تطبيقها في الأسئلة. ابعت رقم الاختيار بس.',
+   'مهتم': 'تمام يا [الاسم] 🙌 إنت بدأت علم النفس بالفعل، ولا لسه بتحدد هتذاكر مع مين؟ عشان أقولك الخطوة المناسبة من غير ما أبعتلك تفاصيل مش محتاجها.',
+   'طلب التفاصيل': 'أكيد يا [الاسم]. تحب تعرف الأول مواعيد ومكان الحضور، ولا نظام شرح علم النفس والتدريب على الأسئلة؟ رد بـ «المواعيد» أو «نظام الشرح».',
+   'حجز/حضور': 'أهلًا [الاسم] 👋 هل تحب نراجع معاك تفاصيل الحضور لمجموعة علم النفس؟ رد بـ «ابعت التفاصيل» أو «وقت تاني».'
+  },
+  'ولي الأمر': {
+   'رقم جديد': 'أهلًا بحضرتك، معاك من فريق مستر [اسم المدرس]. هل ابنك/بنتك في تانية بكالوريا؟ بنقدّم شرح علم النفس مع التركيز على فهم المفاهيم والتدريب على الأسئلة. نرسل لحضرتك التفاصيل المناسبة بعد تأكيد المرحلة.',
+   'لم يرد': 'مساء الخير يا فندم، متابعة بسيطة بخصوص علم النفس لتانية بكالوريا. هل تحبوا نرسل مواعيد ومكان المجموعات المتاحة؟ ممكن الرد بـ «نعم» أو «لاحقًا».',
+   'مهتم': 'أهلًا بحضرتك، حتى نساعد الطالب بشكل مناسب، هل يحتاج تركيزًا أكثر على فهم مفاهيم علم النفس، أم تنظيم المذاكرة والتدريب على الأسئلة؟',
+   'طلب التفاصيل': 'تحت أمرك يا فندم. تحبوا نبدأ بتفاصيل المواعيد والمكان، ولا نظام الشرح والمتابعة؟ ردوا بـ «المواعيد» أو «النظام».',
+   'حجز/حضور': 'أهلًا بحضرتك، بنراجع مع حضرتك تفاصيل حضور الطالب لمجموعة علم النفس. هل الموعد الذي تم الاتفاق عليه ما زال مناسبًا؟'
+  }
+ }
+};
+function smartGrade(p){
+ const g=String(p.grade||'');
+ if(/أولى|الأول/.test(g)&&/بكالوريا|ثانوي/.test(g))return 'أولى بكالوريا';
+ if(/تانية|الثاني/.test(g)&&/بكالوريا|ثانوي/.test(g))return 'تانية بكالوريا';
+ if(p.course==='psychology'||p.subject==='علم نفس')return 'تانية بكالوريا';
+ return 'أولى بكالوريا';
+}
+function smartStage(p){
+ if(p.stage==='new')return 'رقم جديد';
+ if(p.stage==='contacted')return 'لم يرد';
+ if(p.stage==='interested')return 'مهتم';
+ if(['booked','attended'].includes(p.stage))return 'حجز/حضور';
+ return 'طلب التفاصيل';
+}
+function pMsg(id){
+ const p=S.prospects.find(x=>x.id===id);
+ if(!p||p.stage==='stop'){toast('هذا الرقم مضبوط على عدم التواصل');return}
+ const initialAudience=p.parentPhone?'ولي الأمر':'الطالب';
+ const grade=smartGrade(p), stage=smartStage(p);
+ const fillSmart=(txt)=>txt.split('[الاسم]').join(p.name||'').split('[اسم المدرس]').join(S.teacher||'محمود حسني').split('[الصف]').join(grade);
+ const build=()=>fillSmart((SMART_MSGS[grade][$('#pma').value]||SMART_MSGS[grade]['الطالب'])[$('#pms').value]||SMART_MSGS[grade]['الطالب']['رقم جديد']);
+ const phoneFor=()=>$('#pma').value==='ولي الأمر'?(p.parentPhone||p.phone):p.phone;
+ const audienceOptions=`<option ${initialAudience==='الطالب'?'selected':''}>الطالب</option><option ${initialAudience==='ولي الأمر'?'selected':''} ${!p.parentPhone?'disabled':''}>ولي الأمر${!p.parentPhone?' (أضف رقمه أولًا)':''}</option>`;
+ openDlg(`<h3>مركز الرسائل الذكية</h3><div class="mu">المستهدف: ${esc(p.name||'اسم غير معروف')} · ${esc(p.phone)}<br>المادة المقترحة: ${grade==='أولى بكالوريا'?'فلسفة ومنطق — أولى بكالوريا':'علم نفس — تانية بكالوريا'}</div>
+ <label>المرحلة الدراسية</label><select id="pmg"><option ${grade==='أولى بكالوريا'?'selected':''}>أولى بكالوريا</option><option ${grade==='تانية بكالوريا'?'selected':''}>تانية بكالوريا</option></select>
+ <label>الرسالة موجهة إلى</label><select id="pma">${audienceOptions}</select>
+ <label>حالة المستهدف</label><select id="pms">${['رقم جديد','لم يرد','مهتم','طلب التفاصيل','حجز/حضور'].map(x=>`<option ${x===stage?'selected':''}>${x}</option>`).join('')}</select>
+ <label>الرسالة المقترحة (يمكن تعديلها)</label><textarea id="pmt" rows="7">${esc(fillSmart(SMART_MSGS[grade][initialAudience][stage]||SMART_MSGS[grade][initialAudience]['رقم جديد']))}</textarea>
+ <label>نتيجة المحاولة (لا تُسجّل كإرسال مؤكد)</label><select id="pmr"><option>رسالة مجهزة</option><option>تم الرد</option><option>مهتم</option><option>لا يوجد رد</option><option>طلب عدم التواصل</option></select>
+ <label>موعد المتابعة</label><input id="pmn" type="date"><br><br><button class="btn" id="pmgo">فتح واتساب وتسجيل المحاولة</button> <button class="btn s" onclick="closeDlg()">إلغاء</button>
+ <div class="mu" style="margin-top:8px">الرسائل مبنية على سؤال واضح وخطوة بسيطة، بدون وعود أو ضغط مصطنع. فتح واتساب لا يعني أن الرسالة أُرسلت.</div>`);
+ const refresh=()=>{const gr=$('#pmg').value,au=$('#pma').value,st=$('#pms').value;$('#pmt').value=fillSmart((SMART_MSGS[gr][au]||SMART_MSGS[gr]['الطالب'])[st]||SMART_MSGS[gr][au]['رقم جديد']);};
+ $('#pmg').onchange=()=>{const au=$('#pma').value,gr=$('#pmg').value;$('#pmt').value=fillSmart((SMART_MSGS[gr][au]||SMART_MSGS[gr]['الطالب'])[$('#pms').value]||SMART_MSGS[gr][au]['رقم جديد']);};
+ $('#pma').onchange=refresh;$('#pms').onchange=refresh;
+ $('#pmgo').onclick=()=>{
+  const txt=$('#pmt').value,res=$('#pmr').value,nx=$('#pmn').value,phone=phoneFor();
+  if($('#pma').value==='ولي الأمر'&&!p.parentPhone){toast('أضف رقم ولي الأمر في بيانات المستهدف أولًا');return}
+  p.history=p.history||[];p.history.push({date:new Date().toISOString(),channel:'whatsapp',audience:$('#pma').value,grade:$('#pmg').value,stageAtSend:$('#pms').value,text:txt,result:res,nextDate:nx});
+  p.lastContact=today();p.messageAudience=$('#pma').value;p.messageGrade=$('#pmg').value;
+  if(res==='تم الرد'||res==='مهتم')p.stage='interested';if(res==='طلب عدم التواصل')p.stage='stop';if(nx)p.nextDate=nx;
+  save();const url='https://wa.me/2'+nph(phone)+'?text='+encodeURIComponent(txt);closeDlg();
+  if(navigator.onLine)window.open(url,'_blank','noopener');else toast('تم تسجيل المحاولة؛ واتساب يحتاج اتصالًا بالإنترنت');
+  prospects();
+ };
+}
+function pHistory(id){const p=S.prospects.find(x=>x.id===id),hist=(p.history||[]).slice().reverse();openDlg(`<h3>سجل ${esc(p.name||p.phone)}</h3>${hist.length?hist.map(h=>`<div class="card"><b>${esc(h.channel||'تواصل')}</b> · ${esc(h.date||'')}<div>${esc(h.result||'')}</div><div class="mu">${esc(h.nextDate?'المتابعة: '+h.nextDate:'')}</div><div class="mu">${esc((h.text||'').slice(0,180))}</div></div>`).join(''):'<div class="empty">لا توجد محاولات مسجلة بعد.</div>'}<button class="btn s" onclick="closeDlg()">إغلاق</button>`)}
+function pFriday(){openDlg(`<h3>حملات الجمعة المجانية</h3><label>تاريخ الجمعة</label><input id="fdate" type="date" value="${today()}"><label>الصف / المجموعة</label><input id="fgroup" placeholder="مثال: أولى ثانوي"><label>المكان</label><input id="fplace" placeholder="اسم السنتر"><label>السعة الفعلية (اختياري)</label><input id="fcap" type="number" min="1"><label>ملاحظات</label><input id="fnote"><br><br><button class="btn" id="fgo">حفظ الحملة</button> <button class="btn s" onclick="closeDlg()">إغلاق</button><hr>${S.fridays.slice().reverse().map(f=>`<div class="card"><b>${esc(f.date)} · ${esc(f.grade)}</b><div class="mu">${esc(f.place)} · السعة: ${f.capacity||'غير محددة'}</div><button class="btn s" onclick="closeDlg();pFridayTrack('${f.id}')">تسجيل الحجوزات والحضور</button> <button class="btn d" onclick="delFriday('${f.id}')">حذف</button></div>`).join('')}`);
+ $('#fgo').onclick=()=>{const date=$('#fdate').value,grade=$('#fgroup').value.trim();if(!date||!grade){toast('أدخل التاريخ والصف/المجموعة');return}S.fridays.push({id:uid(),date,grade,place:$('#fplace').value.trim(),capacity:+$('#fcap').value||0,notes:$('#fnote').value.trim(),booked:[],attended:[]});save();closeDlg();pFriday()};
+}
+function tkMsg(f,p,code){return `أهلًا بحضرتك، تم تأكيد حجزك في الحصة المجانية يوم ${f.date}${f.place?' في '+f.place:''} (${f.grade}). كودك: ${code} — اعرضه عند الدخول. — ${S.teacher}`}
+function pFridayTrack(id){const f=S.fridays.find(x=>x.id===id);f.booked||=[];f.attended||=[];f.codes||={};
+ openDlg(`<h3>حجوزات الجمعة · ${esc(f.date)}</h3><div class="mu">${esc(f.grade)} · ${esc(f.place)} · محجوز ${f.booked.length}${f.capacity?' من '+f.capacity:''} · حضر ${f.attended.length}</div>
+ <div class="card"><label>تسجيل حضور بالكود</label><div class="row"><input id="fcode" dir="ltr" placeholder="F-XXXX أو MH-XXXXX" autocapitalize="characters"><button class="btn" id="fck">تسجيل</button></div><button class="btn s" style="margin-top:6px" id="fwalk">حضور بدون حجز</button></div>
+ <label>بحث برقم أو اسم</label><input id="fq"><label>اختر مستهدفًا لتسجيل الحجز</label><select id="fb">${fOpts('')}</select><button class="btn" id="fbook">تسجيل حجز وإصدار كود</button><hr><h3>قائمة الحجز</h3>${f.booked.map(id=>{const p=S.prospects.find(x=>x.id===id);if(!p)return '';const c=f.codes[id]||'';return `<div class="row" style="margin:6px 0"><span>${esc(p.name||p.phone)} <span class="mu" dir="ltr">${esc(c)}</span></span><span><button class="btn s" onclick="pFridayAttend('${f.id}','${id}')">${f.attended.includes(id)?'حضر ✓':'تسجيل حضور'}</button>${c?` <a class="btn s" target="_blank" rel="noopener" href="https://wa.me/2${esc(p.phone)}?text=${encodeURIComponent(tkMsg(f,p,c))}">رسالة الكود</a>`:''}</span></div>`}).join('')||'<div class="empty">لا حجوزات حتى الآن.</div>'}<br><button class="btn s" onclick="closeDlg()">إغلاق</button>`);
+ $('#fq').oninput=e=>{$('#fb').innerHTML=fOpts(e.target.value)};
+ $('#fck').onclick=()=>ckCode(id,$('#fcode').value);
+ $('#fwalk').onclick=()=>pWalkIn(id);
+ $('#fbook').onclick=()=>{const pid=$('#fb').value;if(!pid){toast('أضف رقمًا مستهدفًا أولًا');return}const p=S.prospects.find(x=>x.id===pid);if(!p)return;if(f.booked.includes(pid)){toast('هذا المستهدف محجوز بالفعل');return}if(f.capacity>0&&f.booked.length>=f.capacity){toast('اكتملت السعة الفعلية المسجلة لهذه الحملة');return}f.booked.push(pid);const c=newCode(S.codes,'F-',4);f.codes[pid]=c;p.ticket=c;if(!['attended','converted'].includes(p.stage))p.stage='booked';p.history=p.history||[];p.history.push({date:new Date().toISOString(),channel:'friday',result:'حجز حصة الجمعة · كود '+c,nextDate:f.date});save();toast('كود الحجز: '+c);pFridayTrack(id)}}
+function ckCode(fid,raw){const f=S.fridays.find(x=>x.id===fid),c=normCode(raw);if(!c){toast('اكتب الكود');return}
+ const cand=[c,'F'+c];
+ for(const x of S.fridays)for(const [pid,code] of Object.entries(x.codes||{})){if(cand.includes(codeKey(code))){const p=S.prospects.find(y=>y.id===pid);if(x.id!==fid){toast('هذا الكود لحصة '+x.date);return}if(f.attended.includes(pid)){toast('الكود مستخدم من قبل: '+(p?(p.name||p.phone):''));return}pFridayAttend(fid,pid);toast('تم تسجيل حضور '+(p?(p.name||p.phone):'')+' · '+code);return}}
+ const st=S.students.find(s=>codeKey(s.code)===c);if(st){toast('طالب مشترك: '+st.name+' · '+(G(st.gid)?.name||''));return}
+ toast('الكود غير موجود')}
+function pWalkIn(fid){const f=S.fridays.find(x=>x.id===fid);
+ openDlg(`<h3>حضور بدون حجز</h3><p class="mu">يُفتح له رقم ويُصدر له كود ويُسجَّل حضوره الآن.</p><label>الاسم</label><input id="wn"><label>رقم الهاتف *</label><input id="wp" type="tel"><label>الصف</label><select id="wg"><option value="">غير معروف</option>${['الأول الإعدادي','الثاني الإعدادي','الثالث الإعدادي','الأول الثانوي','الثاني الثانوي','الثالث الثانوي','أولى بكالوريا','تانية بكالوريا','أخرى'].map(x=>`<option>${x}</option>`).join('')}</select><div id="we" class="bad"></div><br><div class="row"><button class="btn" id="wgo">تسجيل الحضور وإصدار الكود</button><button class="btn s" onclick="pFridayTrack('${fid}')">رجوع</button></div>`);
+ $('#wgo').onclick=()=>{const ph=nph($('#wp').value);if(!PH.test(ph)){$('#we').textContent='اكتب رقم هاتف مصري صحيحًا';return}f.booked||=[];f.attended||=[];f.codes||={};let p=S.prospects.find(x=>nph(x.phone)===ph);if(!p){p={id:uid(),phone:ph,name:$('#wn').value.trim(),grade:$('#wg').value,center:'',source:'حضور بدون حجز',stage:'new',notes:'',nextDate:'',created:today(),history:[]};S.prospects.push(p)}else if(!p.name&&$('#wn').value.trim())p.name=$('#wn').value.trim();
+  if(f.attended.includes(p.id)){toast('مسجل حضور بالفعل · '+(f.codes[p.id]||''));pFridayTrack(fid);return}
+  if(!f.booked.includes(p.id))f.booked.push(p.id);let c=f.codes[p.id];if(!c){c=newCode(S.codes,'F-',4);f.codes[p.id]=c}p.ticket=c;pFridayAttend(fid,p.id);toast('كود الحضور: '+c)}}
+function fOpts(q){return S.prospects.filter(p=>!['stop','notinterested','converted'].includes(p.stage)&&(!q||na((p.name||'')+' '+p.phone).includes(na(q)))).slice(0,100).map(p=>`<option value="${p.id}">${esc(p.name||p.phone)}</option>`).join('')}
+function pFridayAttend(fid,pid){const f=S.fridays.find(x=>x.id===fid),p=S.prospects.find(x=>x.id===pid);if(!f||!p||f.attended.includes(pid))return;f.attended.push(pid);if(p.stage!=='converted')p.stage='attended';p.history=p.history||[];p.history.push({date:new Date().toISOString(),channel:'friday',result:'حضر حصة الجمعة'});save();pFridayTrack(fid)}
+function pConvert(id){const p=S.prospects.find(x=>x.id===id);if(p&&(p.stage==='converted'||S.students.some(x=>x.prospectId===p.id))){toast('تم تحويل هذا المستهدف إلى طالب من قبل');return}if(!S.groups.length){toast('أنشئ مجموعة قبل التحويل');return}
+ openDlg(`<h3>تحويل إلى طالب</h3><p class="mu">سيُنشأ سجل طالب جديد ويظل سجل المستهدف محفوظًا.</p><label>اسم الطالب *</label><input id="cn" value="${esc(p.name||'')}"><label>رقم الطالب (اختياري)</label><input id="cp" value="${esc(p.phone)}"><label>اسم ولي الأمر *</label><input id="cpar"><label>رقم ولي الأمر *</label><input id="cpp"><label>المجموعة</label><select id="cg">${S.groups.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join('')}</select><div id="cerr" class="bad"></div><br><button class="btn" id="cgo">إنشاء سجل الطالب</button> <button class="btn s" onclick="closeDlg()">إلغاء</button>`);
+ $('#cgo').onclick=()=>{const name=$('#cn').value.trim(),phone=nph($('#cp').value),parent=$('#cpar').value.trim(),pphone=nph($('#cpp').value),gid=$('#cg').value;if(!name||!parent||!PH.test(pphone)||(phone&&!PH.test(phone))){$('#cerr').textContent='أدخل الاسم واسم ولي الأمر ورقم ولي الأمر الصحيح';return}if(S.students.some(x=>x.prospectId===p.id)){closeDlg();toast('تم تحويله من قبل');return}const g=G(gid);const ns={id:uid(),code:newCode(S.codes,'MH-',5),fcode:p.ticket||'',refBy:p.refCode||'',name,phone,parent,pphone,gid,fee:g?.fee||0,status:'active',notes:'مصدر التسجيل: '+(p.source||p.center||'مستهدف')+'؛ رقم المستهدف: '+p.phone,enrolled:today(),lastContact:today(),nextAction:'متابعة الطالب الجديد',nextDate:'',prospectId:p.id};S.students.push(ns);p.stage='converted';p.history=p.history||[];p.history.push({date:new Date().toISOString(),channel:'conversion',result:'تم التحويل إلى طالب · كود '+ns.code});p.studentCode=ns.code;save();closeDlg();toast('تم التحويل · كود الطالب '+ns.code);sCard(ns.id)}}
+
+
+
+/* ---------- collection queue / absence messages / today block ---------- */
+const REMD=3;
+const pDue=p=>p.nextDate&&p.nextDate<=today()&&!['converted','notinterested','stop'].includes(p.stage);
+function dueList(){const dd=+today().slice(8)>=S.set.dueDay;return S.bills.filter(b=>bal(b)>0&&ST(b.sid)&&ST(b.sid).status==='active'&&(b.period<per()||(b.period===per()&&dd))&&!(b.rem&&days(b.rem)<REMD)).sort((a,b)=>a.period.localeCompare(b.period)||bal(b)-bal(a))}
+function qDue(){const q=dueList(),b=q[0];
+ if(!b){if(FLOW.on){flowNext();return}openDlg(`<h3>طابور التحصيل</h3><div class="empty">لا مستحقات تحتاج تذكيرًا الآن. من أُرسل له تذكير يعود بعد ${REMD} أيام إن لم يسدد.</div><br><button class="btn s" onclick="closeDlg()">إغلاق</button>`);return}
+ const s=ST(b.sid),g=G(s.gid)||{},T=(b.period<per()&&paid(b)===0)?'تأخر الاشتراك':'تذكير بالسداد',tot=q.reduce((a,x)=>a+bal(x),0),text=fill(S.tpl[T][1],s,T,b);
+ const n=S.log.filter(l=>l.status==='prep'&&String(l.date).slice(0,10)===today()&&['تأخر الاشتراك','تذكير بالسداد'].includes(l.type)).length;
+ openDlg(`${stepTag()}<h3>طابور التحصيل · متبقي ${q.length}</h3><div class="mu">إجمالي المتبقي في الطابور ${tot} ج · جُهّز اليوم ${n}</div><div class="card"><b>${esc(s.name)}</b> <span class="tag">${esc(perAr(b.period))}</span><div class="mu">${esc(g.name||'')} · المتبقي <b class="bad">${bal(b)}</b> ج من ${b.amount}${b.rem?' · آخر تذكير '+esc(b.rem):''}</div></div><label>الرسالة لولي الأمر (للتعديل الدائم: صفحة القوالب)</label><textarea id="dt" rows="5">${esc(text)}</textarea><div class="row" style="margin-top:8px"><a class="btn" id="dw" target="_blank" rel="noopener" href="${wa(s.pphone,text)}">فتح واتساب</a><button class="btn s" id="dp">سجّل دفعة</button><button class="btn s" id="dk">تخطي ${REMD} أيام</button><button class="btn s" onclick="closeDlg();shell()">إغلاق</button></div><div class="mu" style="margin-top:6px">يُسجَّل «رسالة مجهزة» فقط، ولا إرسال تلقائي.</div>`);
+ $('#dt').oninput=e=>{$('#dw').href=wa(s.pphone,e.target.value)};
+ $('#dw').onclick=e=>{if(!navigator.onLine){e.preventDefault();toast('واتساب يحتاج إنترنت');return}S.log.push({id:uid(),sid:s.id,target:'parent',type:T,text:$('#dt').value,date:today()+'T'+new Date().toTimeString().slice(0,8),status:'prep',result:'',next:''});b.rem=today();save();setTimeout(qDue,400)};
+ $('#dp').onclick=()=>{closeDlg();pForm(b.id)};
+ $('#dk').onclick=()=>{b.rem=today();save();qDue()}}
+function absList(gid,date){const r=[];S.sessions.filter(x=>gid?x.gid===gid&&x.date===date:days(x.date)<=7).sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>Object.entries(x.rec).forEach(([sid,v])=>{const s=ST(sid);if(v==='absent'&&s&&s.status==='active'&&!S.log.some(l=>l.sid===sid&&l.type==='غياب طالب'&&String(l.text).includes(x.date)))r.push({x,s})}));return r}
+function absText(s,date){return fill(S.tpl['غياب طالب'][1],s,'غياب طالب',null,date)}
+function absQ(gid,date){const l=absList(gid,date);if(!l.length&&FLOW.on){flowNext();return}
+ openDlg(`${stepTag()}<h3>رسائل الغياب${gid?' · '+esc(G(gid)?.name||''):' · آخر 7 أيام'}</h3>${l.length?`<div class="mu">اضغط «إرسال» لكل ولي أمر وراجع الرسالة داخل واتساب. يُسجَّل «رسالة مجهزة» فقط.</div>${l.map(({x,s})=>`<div class="row" style="margin:6px 0"><span>${esc(s.name)} <span class="mu">${esc(x.date)} · ${esc(G(x.gid)?.name||'')}</span></span><a class="btn" target="_blank" rel="noopener" href="${wa(s.pphone,absText(s,x.date))}" onclick="absLog('${s.id}','${x.date}',this)">إرسال</a></div>`).join('')}`:'<div class="empty">لا غياب بانتظار رسالة.</div>'}<br><button class="btn s" onclick="closeDlg();shell()">إغلاق</button>`)}
+function absLog(sid,date,a){const s=ST(sid);if(!s||!navigator.onLine)return;if(!S.log.some(l=>l.sid===sid&&l.type==='غياب طالب'&&String(l.text).includes(date)))S.log.push({id:uid(),sid,target:'parent',type:'غياب طالب',text:absText(s,date),date:today()+'T'+new Date().toTimeString().slice(0,8),status:'prep',result:'',next:''});save();a.textContent='أُجهزت ✓'}
+function todayBlock(){const it=[],dl=dueList(),al=absList('',''),pend=S.prospects.filter(p=>p.stage==='new'&&!p.qskip&&!(p.history||[]).some(h=>h.channel==='whatsapp')).length,rp=qPend().length,fu=S.prospects.filter(pDue).length,nf=S.fridays.filter(f=>f.date>=today()).sort((a,b)=>a.date.localeCompare(b.date))[0];
+ if(dl.length)it.push([dl.length,`تحصيل · ${dl.reduce((a,b)=>a+bal(b),0)} ج`,'qDue()','bad']);
+ if(al.length)it.push([al.length,'غياب بانتظار رسالة','absQ(\'\',\'\')','wn']);
+ if(fu)it.push([fu,'متابعات مستهدفين مستحقة','pdue=true;page=\'prospects\';shell()','wn']);
+ const rk=riskList().length;if(rk)it.push([rk,'طلاب في خطر انسحاب','riskQ()','bad']);
+ const mq=+today().slice(8)>=25?monthList().length:0;if(mq)it.push([mq,'تقارير الشهر بانتظار الإرسال','monthQ()','ok']);
+ const rn=renewList().length;if(rn)it.push([rn,'جاهزون لتذكير التجديد','renewQ()','ok']);
+ if(rp)it.push([rp,'ردود لم تُسجَّل','qReplies()','']);
+ const fl=remList().length+followList().length;if(fl)it.push([fl,'تذكيرات ومتابعات مستحقة','qFollow()','wn']);
+ if(pend)it.push([pend,'أرقام بانتظار رسالة','pQueue()','']);
+ if(nf)it.push([(nf.booked||[]).length,`جمعة ${nf.date} · حضر ${(nf.attended||[]).length}`,`pFridayTrack('${nf.id}')`,'ok']);
+ return `<h3>مهمتك النهارده</h3><button class="btn" style="margin-bottom:8px" onclick="dayFlow()">ابدأ يومي ←</button>${it.length?`<div class="grid">${it.map(c=>`<div class="card"><div class="k ${c[3]}">${c[0]}</div><div class="mu">${c[1]}</div><button class="btn s" style="margin-top:6px" onclick="${c[2]}">فتح</button></div>`).join('')}</div>`:'<div class="empty">لا مهام معلّقة الآن.</div>'}`}
+
+
+/* ---------- targeting plan ---------- */
+const lvl=p=>{const r={new:0,contacted:1,interested:2,booked:3,attended:4,converted:5}[p.stage]??0;return Math.max(r,p.ticket?3:0,S.fridays.some(f=>(f.attended||[]).includes(p.id))?4:0,p.studentCode?5:0)};
+const hasWa=p=>(p.history||[]).some(h=>h.channel==='whatsapp');
+const pc=(a,b)=>b?Math.round(a/b*100)+'%':'—';
+const addDays=n=>new Date(Date.now()+n*864e5).toISOString().slice(0,10);
+function funnel(){const sent=S.prospects.filter(hasWa),L=S.prospects.map(lvl);return{pool:S.prospects.length,sent:sent.length,replied:S.prospects.filter(p=>lvl(p)>=1||(hasWa(p)&&p.stage!=='new')).length,interested:L.filter(x=>x>=2).length,booked:L.filter(x=>x>=3).length,attended:L.filter(x=>x>=4).length,enrolled:L.filter(x=>x>=5).length}}
+function segs(key){const m={};S.prospects.forEach(p=>{const k=(key==='grade'?p.grade:(p.source||p.center))||'غير محدد',o=m[k]||(m[k]={k,sent:0,rep:0,int:0,enr:0}),sent=hasWa(p),l=lvl(p);if(sent)o.sent++;if(l>=1||(sent&&p.stage!=='new'))o.rep++;if(l>=2)o.int++;if(l>=5)o.enr++});return Object.values(m).sort((a,b)=>b.sent-a.sent||b.int-a.int).slice(0,6)}
+function sendable(){return S.prospects.filter(p=>p.stage==='new'&&!p.qskip&&!hasWa(p)).length}
+function sentToday(){return S.prospects.reduce((a,p)=>a+(p.history||[]).filter(h=>h.channel==='whatsapp'&&String(h.date||'').slice(0,10)===today()).length,0)}
+function followList(){return S.prospects.filter(p=>{if(p.stage!=='new'||p.qskip)return false;const w=(p.history||[]).filter(h=>h.channel==='whatsapp');return w.length===1&&days(String(w[0].date).slice(0,10))>=3&&!(p.history||[]).some(h=>h.channel==='reply'&&h.result!=='لا يوجد رد')})}
+function remList(){const r=[];S.fridays.forEach(f=>{const d=-days(f.date);if(d<0||d>2)return;(f.booked||[]).forEach(pid=>{const p=S.prospects.find(x=>x.id===pid);if(p&&!(f.attended||[]).includes(pid)&&!['stop','notinterested','converted'].includes(p.stage)&&!(p.history||[]).some(h=>h.channel==='friday'&&String(h.result).startsWith('تذكير بالموعد '+f.date)))r.push({f,p})})});return r}
+function remText(f,p){const c=(f.codes||{})[p.id]||'';return `تذكير: حصة الجمعة ${f.date}${f.place?' في '+f.place:''}${c?' — كودك '+c:''}. نراكم بإذن الله. لو تعذّر الحضور رد علينا لنفتح مكانك لغيرك. — ${S.teacher}`}
+function fuText(p){return (S.fTpl||FTPL0).split('[الصف]').join(p.grade||'الصف الدراسي').split('[الاسم]').join(p.name||'').split('[اسم المدرس]').join(S.teacher||'')}
+function qFollow(){const R=remList(),F=followList();if(!R.length&&!F.length&&FLOW.on){flowNext();return}
+ openDlg(`${stepTag()}<h3>المتابعات والتذكيرات</h3><div class="mu">جُهّز اليوم ${sentToday()} من ${S.plan.daily}. «إرسال» يفتح واتساب ويُسجَّل «رسالة مجهزة» فقط.</div>
+ <h3>تذكير بموعد الجمعة (${R.length})</h3>${R.slice(0,12).map(({f,p})=>`<div class="row" style="margin:6px 0"><span>${esc(p.name||p.phone)} <span class="mu">${esc(f.date)}</span></span><a class="btn" target="_blank" rel="noopener" href="https://wa.me/2${esc(p.phone)}?text=${encodeURIComponent(remText(f,p))}" onclick="fLog('${p.id}','rem','${f.id}',this)">إرسال</a></div>`).join('')||'<div class="empty">لا تذكيرات مستحقة (تظهر قبل الموعد بيومين).</div>'}
+ <h3>متابعة ثانية لمن لم يرد (${F.length})</h3><div class="mu">أُرسلت لهم الرسالة الأولى منذ 3 أيام أو أكثر دون رد. المتابعة مرة واحدة فقط.</div>${F.slice(0,12).map(p=>`<div class="row" style="margin:6px 0"><span>${esc(p.phone)} <span class="mu">${esc(p.grade||'')}</span></span><a class="btn" target="_blank" rel="noopener" href="https://wa.me/2${esc(p.phone)}?text=${encodeURIComponent(fuText(p))}" onclick="fLog('${p.id}','fu','',this)">إرسال</a></div>`).join('')||'<div class="empty">لا متابعات مستحقة.</div>'}
+ ${F.length>12||R.length>12?'<div class="mu">تظهر أول 12 في كل قائمة؛ أعد فتح الشاشة بعد الإرسال لعرض التالي.</div>':''}<br><div class="row"><button class="btn s" onclick="qFollow()">تحديث</button><button class="btn s" onclick="closeDlg();shell()">إغلاق</button></div>`)}
+function fLog(pid,kind,fid,a){const p=S.prospects.find(x=>x.id===pid);if(!p||!navigator.onLine)return;p.history=p.history||[];const f=S.fridays.find(x=>x.id===fid);
+ if(kind==='rem'&&f){if(!p.history.some(h=>h.channel==='friday'&&String(h.result).startsWith('تذكير بالموعد '+f.date)))p.history.push({date:new Date().toISOString(),channel:'friday',result:'تذكير بالموعد '+f.date,text:remText(f,p)})}
+ else p.history.push({date:new Date().toISOString(),channel:'whatsapp',text:fuText(p),result:'متابعة ثانية (مجهزة)',nextDate:''});
+ p.lastContact=today();save();a.textContent='أُجهزت ✓'}
+function pPlan(){const P=S.plan,F=funnel(),r=P.rates,prod=['reply','interest','book','attend','enroll'].reduce((a,k)=>a*(r[k]||0)/100,1),left=Math.max(0,P.goal-F.enrolled),need=prod>0?Math.ceil(left/prod):0,pool=sendable(),dl=P.daily>0?Math.ceil(pool/P.daily):0,small=F.sent<30;
+ const steps=[['رد','reply',F.replied,F.sent],['اهتمام','interest',F.interested,F.replied],['حجز','book',F.booked,F.interested],['حضور','attend',F.attended,F.booked],['اشتراك','enroll',F.enrolled,F.attended]];
+ const seg=(t,l)=>`<h3>${t}</h3><div class="card tw"><table><tr><th></th><th>أُرسل</th><th>ردّ</th><th>مهتم</th><th>اشترك</th></tr>${l.map(o=>`<tr><td>${esc(o.k)}</td><td>${o.sent}</td><td>${pc(o.rep,o.sent)}</td><td>${pc(o.int,o.sent)}</td><td>${o.enr}</td></tr>`).join('')||'<tr><td colspan="5" class="mu">لا بيانات بعد</td></tr>'}</table></div>`;
+ openDlg(`<h3>خطة الاستهداف</h3>
+ <div class="card"><b>الهدف:</b> <input id="pl_goal" type="number" min="1" value="${P.goal}" style="width:90px"> طالب مشترك · <b>الإرسال اليومي:</b> <input id="pl_daily" type="number" min="1" value="${P.daily}" style="width:90px"></div>
+ <h3>الفرضيات والواقع</h3><div class="mu">النسب المفترضة تخمينات قابلة للتعديل، وليست أرقامًا مؤكدة. استبدلها بنسبك الفعلية بعد ${small?'إرسال 30 رسالة على الأقل (عيّنتك الآن '+F.sent+')':'أن صارت عيّنتك كافية'}.</div>
+ <div class="card tw"><table><tr><th>المرحلة</th><th>فرضيتي %</th><th>الفعلي</th><th>العدد</th></tr>${steps.map(([n,k,a,b])=>`<tr><td>${n}</td><td><input id="pl_${k}" type="number" min="1" max="100" value="${r[k]}" style="width:70px"></td><td>${pc(a,b)}</td><td>${a}/${b}</td></tr>`).join('')}</table></div>
+ <div class="row"><button class="btn" id="pl_save">حفظ الفرضيات</button><button class="btn s" id="pl_act">اعتمد نسبي الفعلية (للمراحل ذات عيّنة 10+)</button></div><div id="pl_err" class="bad"></div>
+ <h3>الحساب</h3><div class="card"><div>المتبقي للهدف: <b>${left}</b> طالب</div><div>أرقام مطلوب إرسالها (تقدير مبسّط يتجاهل من هم قيد المتابعة): <b>${need}</b></div><div>أرقام جاهزة للإرسال الآن: <b>${pool}</b> ${pool>=need?'<span class="ok">كافية</span>':'<span class="bad">ينقصك '+(need-pool)+'</span>'}</div><div>مدة إرسال المتاح بـ${P.daily}/يوم: <b>${dl}</b> يوم · تنتهي حوالي ${esc(addDays(dl))}</div><div class="mu">اليوم: جُهّز ${sentToday()} من ${P.daily}</div></div>
+ <h3>مهام اليوم</h3><div class="row"><button class="btn" onclick="pQueue()">إرسال أول رسالة (${Math.max(0,P.daily-sentToday())} متبقي من حصة اليوم)</button><button class="btn s" onclick="qFollow()">تذكيرات ومتابعات (${remList().length+followList().length})</button><button class="btn s" onclick="qReplies()">تسجيل الردود (${qPend().length})</button></div>
+ ${(()=>{const f=refStats();return f.total?`<h3>الإحالات</h3><div class="card">${f.total} مستهدف جاء بإحالة · اشترك ${f.enr}${f.top.map(o=>`<div class="mu">${esc(o.name)}: ${o.n} مُحال · ${o.enr} اشترك</div>`).join('')}</div>`:''})()}${seg('حسب الصف',segs('grade'))}${seg('حسب المصدر / السنتر',segs('source'))}<div class="mu">قارن النسب بين الصفوف والمصادر بعد ظهور عيّنة معقولة؛ ثم وجّه إرسال اليوم لمن يعطي نتيجة أفضل.</div><br><button class="btn s" onclick="closeDlg();shell()">إغلاق</button>`);
+ const rd=()=>{const g=+$('#pl_goal').value,d=+$('#pl_daily').value,rt={};for(const [n,k] of steps.map(x=>[x[0],x[1]])){const v=+$('#pl_'+k).value;if(!(v>=1&&v<=100)){$('#pl_err').textContent='النسب بين 1 و100';return null}rt[k]=v}if(!(g>=1&&d>=1)){$('#pl_err').textContent='الهدف والإرسال اليومي أرقام موجبة';return null}return{goal:Math.round(g),daily:Math.round(d),rates:rt}};
+ $('#pl_save').onclick=()=>{const v=rd();if(!v)return;S.plan=v;save();toast('تم حفظ الخطة');pPlan()};
+ $('#pl_act').onclick=()=>{if(F.sent<30){toast('العيّنة أقل من 30 رسالة؛ النسب الفعلية غير موثوقة بعد');return}const v=rd();if(!v)return;steps.forEach(([n,k,a,b])=>{if(b>=10)v.rates[k]=Math.max(1,Math.min(100,Math.round(a/b*100)))});S.plan=v;save();toast('اعتُمدت نسبك الفعلية للمراحل التي عيّنتها 10 أو أكثر');pPlan()}}
+
+
+/* ---------- settings / renewal / lock ---------- */
+const cyc=()=>+S.set.cycle||8;
+const sesN=sid=>S.sessions.filter(x=>x.date.startsWith(per())&&x.rec[sid]&&['present','late','absent','excused'].includes(x.rec[sid])).length;
+function renewList(){return S.students.filter(s=>{if(s.status!=='active'||sesN(s.id)<cyc())return false;const b=S.bills.find(b=>b.sid===s.id&&b.period===per());if(b&&bal(b)>0)return false;return !S.log.some(l=>l.sid===s.id&&l.type==='تجديد الاشتراك'&&String(l.date).startsWith(per()))})}
+function renewQ(){const l=renewList();if(!l.length&&FLOW.on){flowNext();return}
+ openDlg(`${stepTag()}<h3>تجديد الاشتراك</h3><div class="mu">طلاب بلغوا ${cyc()} حصص هذا الشهر وليس عليهم متبقٍ. «إرسال» يفتح واتساب ويُسجَّل «رسالة مجهزة» فقط.</div>${l.length?l.slice(0,15).map(s=>`<div class="row" style="margin:6px 0"><span>${esc(s.name)} <span class="mu">${sesN(s.id)} حصة</span></span><a class="btn" target="_blank" rel="noopener" href="${wa(s.pphone,fill(S.tpl['تجديد الاشتراك'][1],s,'تجديد الاشتراك'))}" onclick="rLog('${s.id}',this)">إرسال</a></div>`).join(''):'<div class="empty">لا أحد بانتظار تذكير تجديد.</div>'}${l.length>15?'<div class="mu">تظهر أول 15؛ أعد الفتح بعد الإرسال.</div>':''}<br><button class="btn s" onclick="closeDlg();shell()">إغلاق</button>`)}
+function rLog(sid,a){const s=ST(sid),T='تجديد الاشتراك';if(!s||!navigator.onLine)return;if(!S.log.some(l=>l.sid===sid&&l.type===T&&String(l.date).startsWith(per())))S.log.push({id:uid(),sid,target:'parent',type:T,text:fill(S.tpl[T][1],s,T),date:today()+'T'+new Date().toTimeString().slice(0,8),status:'prep',result:'',next:''});save();a.textContent='أُجهزت ✓'}
+const LK='mh_lock';
+const lkGet=()=>{try{return JSON.parse(localStorage.getItem(LK)||'null')}catch(e){return null}};
+const lkPut=o=>{try{o?localStorage.setItem(LK,JSON.stringify(o)):localStorage.removeItem(LK);return true}catch(e){return false}};
+const subtleOK=()=>!!(globalThis.crypto&&crypto.subtle&&crypto.getRandomValues);
+const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+const pinNorm=v=>dg(v).replace(/\D/g,'');
+const rcNorm=v=>String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+async function pbk(pw,salt){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);return hex(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:new TextEncoder().encode(salt),iterations:150000},k,256))}
+const rndHex=n=>hex(crypto.getRandomValues(new Uint8Array(n)));
+async function lkSetup(pin,mins){if(!/^\d{4,8}$/.test(pin))throw new Error('pin');const r=crypto.getRandomValues(new Uint32Array(12));let rc='';for(let i=0;i<12;i++){rc+=CA[r[i]%CA.length];if(i%4===3&&i<11)rc+='-'}const s=rndHex(16),rs=rndHex(16);if(!lkPut({s,h:await pbk(pin,s),rs,rh:await pbk(rcNorm(rc),rs),mins:+mins||1,fails:0,until:0}))throw new Error('store');return rc}
+async function lkCheck(pin){const o=lkGet();if(!o)return{ok:true};const wait=Math.ceil((o.until-Date.now())/1000);if(wait>0)return{ok:false,wait};const ok=(await pbk(pinNorm(pin),o.s))===o.h;if(ok){if(o.fails){o.fails=0;lkPut(o)}return{ok:true}}o.fails=(o.fails||0)+1;if(o.fails>=5){o.until=Date.now()+30000;o.fails=0}lkPut(o);return{ok:false,wait:Math.max(0,Math.ceil((o.until-Date.now())/1000))}}
+async function lkRecover(code){const o=lkGet();if(!o)return true;if((await pbk(rcNorm(code),o.rs))===o.rh){lkPut(null);return true}return false}
+let locked=false,hidAt=0,lkCb=null;
+function showLock(cb){try{const d=$('#dlg');if(d.open)d.close()}catch(e){}lkCb=cb||lkCb;locked=true;$('#lk').style.display='flex';$('#lkp').value='';$('#lke').textContent='';$('#lkr').style.display='none';setTimeout(()=>{try{$('#lkp').focus()}catch(e){}},50)}
+function hideLock(){locked=false;$('#lk').style.display='none';const c=lkCb;lkCb=null;if(c)c()}
+async function lkTry(){const r=await lkCheck($('#lkp').value);if(r.ok){hideLock();return true}$('#lke').textContent=r.wait?`محاولات كثيرة، انتظر ${r.wait} ثانية`:'الرمز غير صحيح';$('#lkp').value='';return false}
+$('#lkg').onclick=lkTry;$('#lkp').onkeydown=e=>{if(e.key==='Enter')lkTry()};
+$('#lkf').onclick=e=>{e.preventDefault();$('#lkr').style.display='flex'};
+$('#lkx').onclick=async()=>{if(await lkRecover($('#lkc').value)){hideLock();toast('أُلغي القفل؛ فعّله من جديد من الإعدادات')}else $('#lke').textContent='كود الاسترجاع غير صحيح'};
+let lockedBefore=false;
+document.addEventListener('visibilitychange',()=>{const o=lkGet();if(!o)return;if(document.hidden){lockedBefore=locked;hidAt=Date.now();showLock()}else if(!lockedBefore&&Date.now()-hidAt<=(o.mins||1)*60000){locked=false;$('#lk').style.display='none'}});
+function boot(){if(lkGet())showLock(()=>shell());else shell()}
+function lkDlg(mode){const need=mode!=='new';
+ openDlg(`<h3>${mode==='new'?'تفعيل القفل':mode==='chg'?'تغيير الرمز':'إلغاء القفل'}</h3>${need?'<label>الرمز الحالي</label><input id="k0" type="password" inputmode="numeric" maxlength="8">':''}${mode==='off'?'':`<label>${mode==='chg'?'الرمز الجديد':'الرمز'} (4 إلى 8 أرقام)</label><input id="k1" type="password" inputmode="numeric" maxlength="8"><label>تأكيد الرمز</label><input id="k2" type="password" inputmode="numeric" maxlength="8"><label>يُطلب الرمز بعد ابتعادك عن التطبيق</label><select id="k3"><option value="1">دقيقة</option><option value="5">5 دقائق</option><option value="15">15 دقيقة</option></select>`}<div id="ke" class="bad"></div><br><div class="row"><button class="btn" id="kg">حفظ</button><button class="btn s" onclick="closeDlg()">إلغاء</button></div>`);
+ $('#kg').onclick=async()=>{try{if(need){const r=await lkCheck($('#k0').value);if(!r.ok){$('#ke').textContent=r.wait?`انتظر ${r.wait} ثانية`:'الرمز الحالي غير صحيح';return}}
+  if(mode==='off'){lkPut(null);closeDlg();toast('أُلغي القفل');sett();return}
+  const a=pinNorm($('#k1').value),b=pinNorm($('#k2').value);if(!/^\d{4,8}$/.test(a)){$('#ke').textContent='الرمز من 4 إلى 8 أرقام';return}if(a!==b){$('#ke').textContent='الرمزان غير متطابقين';return}
+  const rc=await lkSetup(a,$('#k3').value);openDlg(`<h3>كود الاسترجاع</h3><p class="mu">احفظه الآن في مكان آمن خارج هذا الجهاز. لن يظهر مرة أخرى، وهو الطريقة الوحيدة لإلغاء القفل لو نسيت الرمز دون فقدان بياناتك.</p><div class="card k" dir="ltr" style="text-align:center;letter-spacing:2px">${esc(rc)}</div><button class="btn" id="kc">نسخ الكود</button> <button class="btn s" onclick="closeDlg();sett()">حفظته</button>`);$('#kc').onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText(rc):Promise.reject()).then(()=>toast('تم النسخ'),()=>toast('انسخه يدويًا'))}}catch(e){$('#ke').textContent='تعذّر حفظ القفل على هذا الجهاز'}}}
+function sett(){const o=lkGet(),r=S.set;
+ out(`<h2>الإعدادات</h2><h3>بيانات المدرس</h3><div class="card"><label>الاسم (يظهر في الرسائل)</label><input id="st_n" value="${esc(S.teacher)}"><label>رقم واتساب المدرس</label><input id="st_p" type="tel" dir="ltr" value="${esc(S.tp)}"><div id="st_e" class="bad"></div><br><button class="btn" id="st_s">حفظ</button></div>
+ <h3>التجديد</h3><div class="card"><label>عدد حصص الدورة (ينبّه التطبيق للتجديد عند بلوغها)</label><input id="st_c" type="number" min="1" max="31" value="${cyc()}"><br><br><button class="btn" id="st_cs">حفظ</button></div>
+ <h3>القفل بالرمز</h3><div class="card">${!subtleOK()?'<div class="warn">القفل يتطلب فتح التطبيق عبر https أو localhost؛ غير متاح في هذا الوضع.</div>':o?`<div class="ok">القفل مفعّل · يُطلب الرمز بعد ${o.mins||1} دقيقة خارج التطبيق</div><div class="row" style="margin-top:8px"><button class="btn s" onclick="lkDlg('chg')">تغيير الرمز</button><button class="btn d" onclick="lkDlg('off')">إلغاء القفل</button></div>`:'<div class="mu">القفل غير مفعّل.</div><br><button class="btn" onclick="lkDlg(\'new\')">تفعيل القفل</button>'}<div class="mu" style="margin-top:8px">القفل يحجب التطبيق عن الفضول العادي ويُخفي المحتوى عند الخروج منه، لكن البيانات تبقى مخزنة على الجهاز نفسه. لذلك احتفظ بنسخة احتياطية وبكود الاسترجاع.</div></div>`);
+ $('#st_s').onclick=()=>{const n=$('#st_n').value.trim(),p=nph($('#st_p').value);if(!n){$('#st_e').textContent='اكتب الاسم';return}if(!PH.test(p)){$('#st_e').textContent='رقم واتساب مصري صحيح (مثل 01012345678)';return}S.teacher=n;S.tp=p;save();toast('تم الحفظ');shell()};
+ $('#st_cs').onclick=()=>{const c=Math.round(+$('#st_c').value);if(!(c>=1&&c<=31)){toast('عدد الحصص من 1 إلى 31');return}S.set={...S.set,cycle:c};save();toast('تم الحفظ');sett()}}
+
+
+/* ---------- guided day flow / undo ---------- */
+const FLOW={on:false,i:-1,n:0,pos:0,label:''};
+function flowSteps(){const quota=Math.max(0,Math.min(sendable(),S.plan.daily-sentToday()));return[
+ {label:'تحصيل الاشتراكات',n:dueList().length,go:()=>qDue()},
+ {label:'رسائل الغياب',n:absList('','').length,go:()=>absQ('','')},
+ {label:'تسجيل الردود',n:qPend().length,go:()=>qReplies()},
+ {label:'متابعات وتذكيرات',n:remList().length+followList().length,go:()=>qFollow()},
+ {label:'تجديد الاشتراك',n:renewList().length,go:()=>renewQ()},
+ {label:'طلاب في خطر الانسحاب',n:riskList().length,go:()=>riskQ()},
+ {label:'تقرير الشهر لأولياء الأمور',n:+today().slice(8)>=25?monthList().length:0,go:()=>monthQ()},
+ {label:'أرقام جديدة (حصة اليوم)',n:quota,go:()=>pQueue()}]}
+function stepTag(){return FLOW.on?`<div class="row" style="justify-content:space-between;margin-bottom:6px"><span class="mu">خطوة ${FLOW.pos} من ${FLOW.n} · ${FLOW.label}</span><span><button class="btn s" onclick="flowStop()">إنهاء</button> <button class="btn" onclick="flowNext()">التالي ←</button></span></div>`:''}
+function dayFlow(){const st=flowSteps(),tot=st.filter(x=>x.n>0).length;
+ openDlg(`<h3>ابدأ يومك</h3>${tot?`<div class="mu">${tot} خطوات فيها شغل. اضغط «ابدأ» وسأنقلك من واحدة للتالية.</div>`:'<div class="empty">لا توجد مهام معلّقة الآن.</div>'}${st.map(x=>`<div class="row" style="margin:6px 0"><span>${x.n>0?'●':'✓'} ${x.label}</span><b class="${x.n>0?'':'ok'}">${x.n>0?x.n:'خلصت'}</b></div>`).join('')}<br><div class="row">${tot?'<button class="btn" id="fs">ابدأ</button>':''}<button class="btn s" onclick="closeDlg()">إغلاق</button></div>`);
+ if(tot)$('#fs').onclick=()=>{FLOW.on=true;FLOW.i=-1;FLOW.n=tot;FLOW.pos=0;flowNext()}}
+function flowNext(){const st=flowSteps();for(let j=FLOW.i+1;j<st.length;j++){if(st[j].n>0){FLOW.i=j;FLOW.pos++;FLOW.label=st[j].label;FLOW.on=true;st[j].go();return}}flowDone()}
+function flowStop(){FLOW.on=false;closeDlg();shell()}
+function flowDone(){FLOW.on=false;openDlg(`<h3>خلصت يومك ✓</h3><div class="card">جُهّز اليوم ${sentToday()} رسالة من حصة ${S.plan.daily}.${(!S.lastBackup||days(S.lastBackup)>7)?'<div class="warn" style="margin-top:8px">لم تأخذ نسخة احتياطية منذ أكثر من أسبوع.</div>':''}</div><br><div class="row">${(!S.lastBackup||days(S.lastBackup)>7)?'<button class="btn" onclick="closeDlg();bkp()">خذ نسخة الآن</button>':''}<button class="btn s" onclick="closeDlg();shell()">إغلاق</button></div>`)}
+let ubT=null;
+function undoToast(m){const b=$('#ub');b.innerHTML=`<span>${esc(m)}</span> <button class="btn s" onclick="undoDel()">تراجع</button>`;b.style.display='flex';clearTimeout(ubT);ubT=setTimeout(()=>{b.style.display='none'},9000)}
+function undoDel(){clearTimeout(ubT);$('#ub').style.display='none';try{const p=JSON.parse(localStorage.getItem(KEY+'_pre_delete')||'null');if(!p||!valid(p)){toast('لا توجد نسخة صالحة للتراجع');return}S=fix(p);dr=null;msS='';msX=null;if(!save(true)){toast('تعذّر حفظ الاسترجاع');return}toast('تم التراجع عن الحذف');shell()}catch(e){toast('تعذّر التراجع')}}
+
+
+/* ---------- first-run checklist ---------- */
+function onbSteps(){return[
+ {t:'اكتب اسمك ورقم واتساب (يظهران في الرسائل)',ok:!!S.teacher&&!!S.tp,go:"page='sett';shell()"},
+ {t:'أضف مجموعتك الأولى',ok:S.groups.some(g=>!g.demo),go:"gForm()"},
+ {t:'أضف رابط جروب واتساب لمجموعة (اختياري)',ok:S.groups.some(g=>glink(g)),go:"page='groups';shell()",opt:true},
+ {t:'أضف طلابك أو استورد أرقام المستهدفين',ok:S.students.some(s=>!s.demo)||S.prospects.length>0,go:"page='students';shell()"},
+ {t:'خذ أول نسخة احتياطية',ok:!!S.lastBackup,go:"bkp()"}]}
+function onbBlock(){if(S.onb&&S.onb.hidden)return '';const st=onbSteps();if(st.filter(x=>!x.opt).every(x=>x.ok))return '';const done=st.filter(x=>x.ok).length;
+ return `<div class="card"><h3>ابدأ من هنا (${done}/${st.length})</h3>${st.map(x=>`<div class="row" style="margin:6px 0"><span>${x.ok?'✓':'○'} ${x.t}${x.opt?'':''}</span>${x.ok?'':`<button class="btn s" onclick="${x.go}">افتح</button>`}</div>`).join('')}<button class="btn s" style="margin-top:6px" onclick="S.onb={hidden:true};save();shell()">إخفاء القائمة</button></div>`}
+
+
+/* ---------- churn risk / monthly report / referrals ---------- */
+const ST_OK=['present','late','absent','excused'];
+function monStats(s,b){const r=S.sessions.filter(x=>x.date.startsWith(per())&&ST_OK.includes(x.rec[s.id])).map(x=>x.rec[s.id]);const bb=b===undefined?S.bills.find(x=>x.sid===s.id&&x.period===per()):b;return{'حضور':r.filter(v=>v==='present'||v==='late').length,'غياب':r.filter(v=>v==='absent').length,'إجمالي الحصص':r.length,'الحالة المالية':bb?(bal(bb)>0?'متبقي '+bal(bb)+' ج':'مسدَّد'):'لا فاتورة بعد'}}
+function riskCtx(){const rec={},lastLog={},bills={};S.sessions.forEach(x=>{for(const sid in x.rec)if(ST_OK.includes(x.rec[sid]))(rec[sid]||(rec[sid]=[])).push(x)});Object.values(rec).forEach(a=>a.sort((p,q)=>q.date.localeCompare(p.date)));const CONTACTED=new Set(['done','noreply','later','closed']);S.log.forEach(l=>{if(!CONTACTED.has(l.status))return;const d=String(l.date).slice(0,10);if(!lastLog[l.sid]||d>lastLog[l.sid])lastLog[l.sid]=d});S.bills.forEach(b=>{(bills[b.sid]||(bills[b.sid]=[])).push(b)});return{rec,lastLog,bills}}
+function riskOf(s,c){c=c||riskCtx();const r=[];let sc=0;
+ const recs=c.rec[s.id]||[],ab=recs.filter(x=>days(x.date)<=30&&x.rec[s.id]==='absent').length,bl=c.bills[s.id]||[];
+ if(ab){sc+=Math.min(35,ab*12);r.push('غاب '+ab+' مرة خلال 30 يومًا')}
+ if(recs.length>=2&&recs[0].rec[s.id]==='absent'&&recs[1].rec[s.id]==='absent'){sc+=15;r.push('غاب آخر حصتين')}
+ if(bl.some(b=>b.period<per()&&bal(b)>0)){sc+=25;r.push('اشتراك شهر سابق غير مسدد')}
+ else{const cb=bl.find(b=>b.period===per());if(cb&&bal(cb)>0&&+today().slice(8)>=S.set.dueDay){sc+=10;r.push('اشتراك الشهر لم يكتمل')}}
+ let last=s.lastContact||'';const ll=c.lastLog[s.id]||'';if(ll>last)last=ll;last=last||s.enrolled||today();
+ if(days(last)>(+S.set.contactDays||30)){sc+=10;r.push('لا تواصل منذ '+days(last)+' يومًا')}
+ sc=Math.min(100,sc);return{score:sc,level:sc>=50?'high':sc>=25?'mid':'',reasons:r}}
+function riskList(){const c=riskCtx();return S.students.filter(s=>s.status==='active'&&!(s.riskUntil&&s.riskUntil>today())).map(s=>({s,...riskOf(s,c)})).filter(x=>x.level==='high').sort((a,b)=>b.score-a.score)}
+const riskTag=(s,c)=>{const k=riskOf(s,c);return k.level==='high'?' <span class="bad">⚠ خطر</span>':k.level==='mid'?' <span class="wn">انتبه</span>':''};
+function riskQ(){const l=riskList();if(!l.length&&FLOW.on){flowNext();return}
+ openDlg(`${stepTag()}<h3>طلاب في خطر الانسحاب (${l.length})</h3><div class="mu">مؤشر تقديري من الغياب والسداد وانقطاع التواصل، وليس حكمًا. «واتساب» يفتح الرسالة ويؤجّل ظهور الطالب 3 أيام، و«تأجيل أسبوع» يخفيه 7 أيام.</div>${l.slice(0,12).map(({s,score,reasons})=>`<div class="card"><b>${esc(s.name)}</b> <span class="tag">${score}</span><div class="mu">${esc(G(s.gid)?.name||'')} · ${esc(reasons.join(' · '))}</div><div class="row" style="margin-top:6px"><a class="btn" target="_blank" rel="noopener" href="${wa(s.pphone,fill(S.tpl['رسالة عامة لولي الأمر'][1],s,'رسالة عامة لولي الأمر'))}" onclick="rkLog('${s.id}',3,this)">واتساب</a><button class="btn s" onclick="rkLog('${s.id}',7)">تأجيل أسبوع</button><button class="btn s" onclick="prof('${s.id}')">ملف</button></div></div>`).join('')||'<div class="empty">لا أحد في خطر مرتفع الآن.</div>'}${l.length>12?'<div class="mu">تظهر أعلى 12.</div>':''}<br><button class="btn s" onclick="closeDlg();shell()">إغلاق</button>`)}
+function rkLog(sid,d,a){const s=ST(sid);if(!s)return;if(a){if(!navigator.onLine)return;const T='رسالة عامة لولي الأمر';S.log.push({id:uid(),sid,target:'parent',type:T,text:fill(S.tpl[T][1],s,T),date:today()+'T'+new Date().toTimeString().slice(0,8),status:'prep',result:'',next:''});a.textContent='أُجهزت ✓'}s.riskUntil=new Date(Date.now()+d*864e5).toISOString().slice(0,10);save();if(!a)riskQ()}
+function monthList(){const done=new Set();S.log.forEach(l=>{if(l.type==='تقرير الشهر'&&String(l.date).startsWith(per()))done.add(l.sid)});const has=new Set();S.sessions.forEach(x=>{if(x.date.startsWith(per()))for(const sid in x.rec)if(ST_OK.includes(x.rec[sid]))has.add(sid)});return S.students.filter(s=>s.status==='active'&&has.has(s.id)&&!done.has(s.id))}
+function monthQ(){const l=monthList();if(!l.length&&FLOW.on){flowNext();return}const T='تقرير الشهر';
+ openDlg(`${stepTag()}<h3>تقرير الشهر لأولياء الأمور (${l.length})</h3><div class="mu">رسالة واحدة لكل ولي أمر بحضور ابنه وغيابه وحالة اشتراكه. «إرسال» يفتح واتساب ويُسجَّل «رسالة مجهزة» مرة في الشهر.</div>${l.slice(0,15).map(s=>{const m=monStats(s);return `<div class="row" style="margin:6px 0"><span>${esc(s.name)} <span class="mu">حضر ${m['حضور']}/${m['إجمالي الحصص']}</span></span><a class="btn" target="_blank" rel="noopener" href="${wa(s.pphone,fill(S.tpl[T][1],s,T))}" onclick="mLog('${s.id}',this)">إرسال</a></div>`}).join('')||'<div class="empty">لا تقارير بانتظار الإرسال.</div>'}${l.length>15?'<div class="mu">تظهر أول 15؛ أعد الفتح بعد الإرسال.</div>':''}<br><button class="btn s" onclick="closeDlg();shell()">إغلاق</button>`)}
+function mLog(sid,a){const s=ST(sid),T='تقرير الشهر';if(!s||!navigator.onLine)return;if(!S.log.some(l=>l.sid===sid&&l.type===T&&String(l.date).startsWith(per())))S.log.push({id:uid(),sid,target:'parent',type:T,text:fill(S.tpl[T][1],s,T),date:today()+'T'+new Date().toTimeString().slice(0,8),status:'prep',result:'',next:''});save();a.textContent='أُجهزت ✓'}
+function refsOf(code){return{done:S.students.filter(x=>x.refBy===code).length,pend:S.prospects.filter(p=>p.refCode===code&&p.stage!=='converted').length}}
+function refStats(){const ps=S.prospects.filter(p=>p.refCode),m={};ps.forEach(p=>{const o=m[p.refCode]||(m[p.refCode]={code:p.refCode,n:0,enr:0});o.n++;if(lvl(p)>=5)o.enr++});return{total:ps.length,enr:ps.filter(p=>lvl(p)>=5).length,top:Object.values(m).sort((a,b)=>b.enr-a.enr||b.n-a.n).slice(0,3).map(o=>({...o,name:(S.students.find(x=>x.code===o.code)||{}).name||o.code}))}}
+
+/* ---------- delete / bulk helpers ---------- */
+const glink=g=>g&&/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9_-]+$/.test(g.wlink||'')?g.wlink:'';
+function snap(){try{localStorage.setItem(KEY+'_pre_delete',JSON.stringify(S));return true}catch(e){toast('تعذّر حفظ نسخة قبل الحذف؛ لم يتم الحذف. صدّر نسخة احتياطية أولًا.');return false}}
+function rmStudents(ids){const set=new Set(ids);S.students=S.students.filter(s=>!set.has(s.id));S.bills=S.bills.filter(b=>!set.has(b.sid));S.log=S.log.filter(l=>!set.has(l.sid));S.actions=S.actions.filter(a=>!set.has(a.sid));S.sessions.forEach(x=>ids.forEach(i=>{delete x.rec[i]}))}
+function delStudent(id){const s=ST(id);if(!s)return;cf(`حذف الطالب «${esc(s.name)}» نهائيًا مع حضوره ودفعاته ورسائله؟ إن أردت الاحتفاظ بسجله فاستخدم «أرشفة». سيُحفظ نسخة قبل الحذف.`,()=>{if(!snap())return;rmStudents([id]);save();undoToast('تم حذف الطالب');students()})}
+function delGroup(id){const g=G(id);if(!g)return;const ids=S.students.filter(s=>s.gid===id).map(s=>s.id),ns=S.sessions.filter(x=>x.gid===id).length;cf(`حذف مجموعة «${esc(g.name)}»؟ ${ids.length?`سيُحذف معها ${ids.length} طالب وكل حضورهم (${ns} جلسة) ودفعاتهم ورسائلهم نهائيًا. لنقل الطلاب بدل الحذف عدّل مجموعة كل طالب أولًا.`:'لا يوجد طلاب بها.'} سيُحفظ نسخة قبل الحذف.`,()=>{if(!snap())return;rmStudents(ids);S.sessions=S.sessions.filter(x=>x.gid!==id);S.groups=S.groups.filter(x=>x.id!==id);if(fg===id)fg='';if(rg===id)rg='';save();undoToast('تم حذف المجموعة');groups()})}
+function delProspect(id){const p=S.prospects.find(x=>x.id===id);if(!p)return;cf(`حذف الرقم ${esc(p.phone)} وسجل تواصله؟`,()=>{if(!snap())return;rmProspects([id]);save();undoToast('تم حذف الرقم');prospects()})}
+function rmProspects(ids){const set=new Set(ids);S.prospects=S.prospects.filter(p=>!set.has(p.id));S.fridays.forEach(f=>{f.booked=(f.booked||[]).filter(i=>!set.has(i));f.attended=(f.attended||[]).filter(i=>!set.has(i));if(f.codes)ids.forEach(i=>{delete f.codes[i]})})}
+function delProspectsList(){const l=pList();if(!l.length){toast('لا توجد أرقام في القائمة الحالية');return}const all=l.length===S.prospects.length;cf(`حذف ${all?'<b>كل</b> المستهدفين':'نتائج القائمة الحالية'} (${l.length} رقم) وسجلات تواصلهم نهائيًا؟${all?' لا يوجد فلتر مفعّل.':''} سيُحفظ نسخة قبل الحذف.`,()=>{if(!snap())return;rmProspects(l.map(p=>p.id));save();PL=50;undoToast(`تم حذف ${l.length} رقم`);prospects()})}
+function delFriday(id){const f=S.fridays.find(x=>x.id===id);if(!f)return;cf(`حذف حملة الجمعة ${esc(f.date)}؟ لا يتأثر المستهدفون.`,()=>{S.fridays=S.fridays.filter(x=>x.id!==id);save();pFriday()})}
+function pList(){return S.prospects.filter(p=>(!pq||na((p.name||'')+' '+p.phone+' '+(p.grade||'')+' '+(p.area||'')).includes(na(pq)))&&(!pf||p.stage===pf)&&(!pdue||pDue(p)))}
+function gCopy(id){const l=glink(G(id));if(!l)return;(navigator.clipboard?navigator.clipboard.writeText(l):Promise.reject()).then(()=>toast('تم نسخ رابط الجروب'),()=>{toast('انسخ الرابط يدويًا: '+l)})}
+function gInvite(gid){const g=G(gid),l=glink(g);if(!l){toast('أضف رابط الجروب أولًا');gForm(gid);return}
+ const T='دعوة جروب المجموعة',ss=S.students.filter(s=>s.gid===gid&&s.status==='active');
+ openDlg(`<h3>دعوة أولياء أمور ${esc(g.name)}</h3><div class="mu">اضغط «إرسال» لكل ولي أمر، وراجع الرسالة داخل واتساب. يُسجَّل «تم تجهيز الرسالة» فقط.</div>${ss.length?ss.map(s=>{const sent=S.log.some(x=>x.sid===s.id&&x.type===T&&x.text.includes(l));return `<div class="row" style="margin:6px 0"><span>${esc(s.name)}</span><a class="btn ${sent?'s':''}" target="_blank" rel="noopener" href="${wa(s.pphone,fill(S.tpl[T][1],s,T))}" onclick="gInvLog('${s.id}',this)">${sent?'أُجهزت ✓ (إعادة)':'إرسال'}</a></div>`}).join(''):'<div class="empty">لا طلاب نشطون في المجموعة.</div>'}<br><button class="btn s" onclick="closeDlg();groups()">إغلاق</button>`)}
+function gInvLog(sid,a){const s=ST(sid),T='دعوة جروب المجموعة';if(!s||!navigator.onLine)return;S.log.push({id:uid(),sid,target:'parent',type:T,text:fill(S.tpl[T][1],s,T),date:today()+'T'+new Date().toTimeString().slice(0,8),status:'prep',result:'',next:''});save();a.textContent='أُجهزت ✓'}
+function cardMsg(s){return `كارت الطالب: ${s.name}\nكودك الدائم: ${s.code}\nاحتفظ به؛ نربط به حضورك واشتراكك ومتابعتك معنا. ولو رشّحت زميلًا فليذكر كودك عند التسجيل. — ${S.teacher}`}
+function sCard(id){const s=ST(id);if(!s)return;const b=S.bills.find(x=>x.sid===id&&x.period===per()),g=G(s.gid);
+ openDlg(`<h3>كارت ${esc(s.name)}</h3><div class="card" style="text-align:center"><div class="k" dir="ltr" style="letter-spacing:2px">${esc(s.code)}</div><div class="mu">${esc(g?.name||'')}${s.fcode?' · بدأ بتذكرة '+esc(s.fcode):''}</div><div class="mu">${(()=>{const f=refsOf(s.code);return f.done||f.pend?'أحال '+f.done+' واشترك · '+f.pend+' قيد المتابعة<br>':''})()}${b?(bal(b)>0?'متبقي '+bal(b)+' ج لشهر '+perAr(per()):'مسدَّد لشهر '+perAr(per())):'لا فاتورة لهذا الشهر'}</div></div><div class="row"><a class="btn" target="_blank" rel="noopener" href="${wa(s.pphone,cardMsg(s))}">إرسال لولي الأمر</a>${s.phone?`<a class="btn s" target="_blank" rel="noopener" href="${wa(s.phone,cardMsg(s))}">إرسال للطالب</a>`:''}<button class="btn s" id="cc">نسخ الكود</button></div><div class="row" style="margin-top:8px">${glink(g)?`<button class="btn s" onclick="showMsg('${s.id}','دعوة جروب المجموعة')">دعوة الجروب</button>`:''}<button class="btn s" onclick="prof('${s.id}')">الملف الكامل</button><button class="btn s" onclick="closeDlg();students()">إغلاق</button></div>`);
+ $('#cc').onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText(s.code):Promise.reject()).then(()=>toast('تم نسخ الكود'),()=>toast('الكود: '+s.code))}}
+function sBulk(){if(!S.groups.length){toast('أنشئ مجموعة أولًا');return}
+ openDlg(`<h3>إضافة عدة طلاب</h3><p class="mu">سطر لكل طالب: الاسم ثم رقم ولي الأمر، مثل: <span dir="ltr">أحمد علي 01012345678</span>. يُستخدم اشتراك المجموعة، ويكون اسم ولي الأمر «ولي أمر الاسم».</p><label>المجموعة</label><select id="bg">${S.groups.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join('')}</select><textarea id="bt" rows="8"></textarea><div id="bte" class="bad"></div><br><div class="row"><button class="btn" id="bgo">إضافة</button><button class="btn s" onclick="closeDlg()">إلغاء</button></div>`);
+ $('#bgo').onclick=()=>{const gid=$('#bg').value,g=G(gid);let add=0,dup=0,bad=[];const seen=new Set(S.students.map(s=>s.name+'|'+s.pphone));
+  $('#bt').value.split('\n').forEach(raw=>{const d=dg(raw).trim();if(!d)return;const m=d.match(/(?:\+|00)?\d[\d\s\-]{8,16}\d/);const ph=m?nph(m[0]):'';const name=m?d.replace(m[0],' ').replace(/[,;|\t:\-،؛]+/g,' ').replace(/\s+/g,' ').trim():'';if(!name||!PH.test(ph)){bad.push(raw.trim().slice(0,20));return}const k=name+'|'+ph;if(seen.has(k)){dup++;return}seen.add(k);S.students.push({id:uid(),code:newCode(S.codes,'MH-',5),name,phone:'',parent:'ولي أمر '+name,pphone:ph,gid,fee:g.fee||0,status:'active',notes:'',enrolled:today(),lastContact:'',nextAction:'',nextDate:''});add++});
+  if(!add&&!dup&&!bad.length){$('#bte').textContent='لا توجد بيانات';return}
+  if(add)save();closeDlg();toast(`أُضيف ${add} طالب · مكرر ${dup} · غير صالح ${bad.length}${bad.length?' ('+bad.slice(0,3).join(' | ')+')':''}`);students()}}
+
+/* ---------- groups ---------- */
+function groups(){out(`<h2>المجموعات</h2><button class="btn" onclick="gForm()">+ مجموعة</button><br><br>${S.groups.length?S.groups.map(g=>`<div class="card"><b>${esc(g.name)}</b> <span class="tag">${esc(g.subject)}</span><div class="mu">${esc(g.grade)} · ${esc(g.center)} · ${esc(g.days)} ${esc(g.time)} · ${g.fee} ج · ${S.students.filter(s=>s.gid===g.id&&s.status==='active').length} طالب</div>${glink(g)?'<div class="mu" dir="ltr" style="text-align:right">'+esc(glink(g))+'</div>':'<div class="mu">لا يوجد رابط جروب واتساب</div>'}<div class="row" style="margin-top:8px">${glink(g)?`<a class="btn" target="_blank" rel="noopener" href="${esc(glink(g))}">فتح الجروب</a><button class="btn s" onclick="gCopy('${g.id}')">نسخ الرابط</button><button class="btn s" onclick="gInvite('${g.id}')">دعوة الأولياء</button>`:`<button class="btn s" onclick="gForm('${g.id}')">+ رابط الجروب</button>`}<button class="btn s" onclick="gForm('${g.id}')">تعديل</button><button class="btn d" onclick="delGroup('${g.id}')">حذف</button></div></div>`).join(''):'<div class="empty">لا توجد مجموعات.</div>'}`)}
+function gForm(id){
+ const g=id?G(id):{name:'',grade:'',subject:'',center:'',days:'',time:'16:00',fee:0};
+ openDlg(`<h3>${id?'تعديل':'جديدة'} مجموعة</h3>${[['name','الاسم'],['grade','الصف'],['subject','المادة'],['center','السنتر'],['days','الأيام (مثل: السبت، الثلاثاء)']].map(f=>`<label>${f[1]}</label><input id="g_${f[0]}" value="${esc(g[f[0]])}">`).join('')}<label>رابط جروب واتساب (اختياري)</label><input id="g_wlink" dir="ltr" placeholder="https://chat.whatsapp.com/..." value="${esc(g.wlink||'')}"><label>الموعد</label><input id="g_time" type="time" value="${g.time}"><label>الاشتراك (ج)</label><input id="g_fee" type="number" min="0" value="${g.fee}"><div id="er" class="bad"></div><br><div class="row"><button class="btn" id="sv">حفظ</button><button class="btn s" onclick="closeDlg()">إلغاء</button></div>`);
+ $('#sv').onclick=()=>{const v={};['name','grade','subject','center','days','time'].forEach(k=>v[k]=$('#g_'+k).value.trim());let w=$('#g_wlink').value.trim().split('?')[0];if(w&&!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9_-]{10,}$/.test(w)){$('#er').textContent='رابط الجروب غير صحيح؛ يجب أن يبدأ بـ https://chat.whatsapp.com/';return}v.wlink=w;v.fee=+$('#g_fee').value||0;
+  if(!v.name){$('#er').textContent='الاسم مطلوب';return}
+  const go=()=>{id?Object.assign(G(id),v):S.groups.push({id:uid(),...v});save();closeDlg();groups()};
+  const c=S.groups.find(x=>x.id!==id&&x.center===v.center&&x.time===v.time&&v.days&&x.days===v.days);
+  c?cf('تعارض محتمل مع '+esc(c.name)+'. حفظ؟',go):go()};
+}
+
+/* ---------- attendance ---------- */
+let ag='',ad=today(),dr=null;
+function att(){
+ if(!ag||!G(ag))ag=S.groups[0]?.id||'';
+ const ss=S.students.filter(s=>s.gid===ag&&s.status==='active'),ex=S.sessions.find(x=>x.gid===ag&&x.date===ad);
+ if(!dr||dr.k!==ag+ad){dr={k:ag+ad,rec:{...(ex?ex.rec:Object.fromEntries(ss.map(s=>[s.id,'present'])))}}}
+ out(`<h2>الحضور</h2><div class="card"><div class="row"><select id="ag">${S.groups.map(g=>`<option value="${g.id}" ${ag===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select><input type="date" id="ad" value="${ad}"></div>${ex?'<div class="warn" style="margin:8px 0 0">جلسة محفوظة لهذا التاريخ: الحفظ سيحدّثها ولن يكررها.</div>':''}</div>
+ <div class="card tw rs">${ss.length?`<div class="row" style="margin-bottom:8px"><button class="btn s" id="al">الكل حاضر</button><span class="mu">اضغط على الحالة لتغييرها: حاضر ← غائب ← متأخر ← بعذر</span></div><table>${ss.map(s=>`<tr><td>${esc(s.name)}</td><td><button class="btn st ${dr.rec[s.id]||''}" data-s="${s.id}" style="color:var(--tx)">${AR[dr.rec[s.id]]||'—'}</button></td><td><a href="tel:${esc(s.pphone)}">${esc(s.pphone)}</a> <a class="btn s" target="_blank" rel="noopener" href="${wa(s.pphone)}">واتساب</a></td></tr>`).join('')}</table><br><button class="btn" id="sa">حفظ الحضور</button>${ex&&absList(ag,ad).length?` <button class="btn s" onclick="absQ('${ag}','${ad}')">رسائل الغياب (${absList(ag,ad).length})</button>`:''}`:'<div class="empty">لا يوجد طلاب في هذه المجموعة.</div>'}</div>
+ <h3>الغياب المتكرر (${S.set.absLimit} أو أكثر)</h3><div class="card">${(()=>{const l=S.students.filter(s=>s.status==='active'&&absN(s.id)>=S.set.absLimit);return l.length?l.map(s=>`<div>${esc(s.name)} — <span class="bad">${absN(s.id)} غياب</span></div>`).join(''):'<span class="mu">لا أحد تجاوز الحد.</span>'})()}</div>`);
+ $('#ag').onchange=e=>{ag=e.target.value;att()};$('#ad').onchange=e=>{ad=e.target.value||today();att()};
+ document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const c=dr.rec[b.dataset.s];dr.rec[b.dataset.s]=ORD[(ORD.indexOf(c)+1)%4];b.className='btn st '+dr.rec[b.dataset.s];b.textContent=AR[dr.rec[b.dataset.s]]});
+ const al=$('#al');if(al)al.onclick=()=>{ss.forEach(s=>dr.rec[s.id]='present');att()};
+ const sa=$('#sa');if(sa)sa.onclick=()=>{
+  const rec={...dr.rec};ex?ex.rec=rec:S.sessions.push({id:uid(),gid:ag,date:ad,rec});let n=0;
+  Object.entries(rec).forEach(([sid,v])=>{const k=`abs:${sid}:${ag}:${ad}`,a=S.actions.find(x=>x.key===k);
+   if(v==='absent'){if(!a){if(addAct(sid,'تواصل مع ولي أمر طالب غائب','high',ad,'غياب بتاريخ '+ad,k))n++}else if(a.status==='cancelled'){a.status='open';n++}}
+   else if(a&&a.status==='open'){a.status='cancelled';a.notes+=' (أُلغي: عُدّل الحضور)'}});
+  save();toast('تم الحفظ'+(n?` · ${n} إجراء متابعة جديد`:''));const abl=absList(ag,ad);att();if(abl.length)absQ(ag,ad)};
+}
+
+/* ---------- payments ---------- */
+let pp=per();
+function pay(){
+ const bp=S.bills.filter(b=>b.period===pp);const due=bp.reduce((a,b)=>a+b.amount,0),got=bp.reduce((a,b)=>a+paid(b),0);
+ const real=S.bills.reduce((a,b)=>a+b.pays.filter(x=>x.date.startsWith(pp)).reduce((c,x)=>c+x.amt,0),0);
+ out(`<h2>الاشتراكات</h2><div class="card"><div class="row"><input type="month" id="pp" value="${pp}"><button class="btn" id="gb">إنشاء فواتير الشهر</button><button class="btn s" onclick="qDue()">طابور التحصيل (${dueList().length})</button></div></div>
+ <div class="grid">${[[due,'المستحق للفترة',''],[got,'المحصّل عن فواتير الفترة','ok'],[due-got,'المتبقي','bad'],[real,'إجمالي الإيراد المحصّل فعليًا في الشهر','ok']].map(c=>`<div class="card"><div class="k ${c[2]}">${c[0]}</div><div class="mu">${c[1]}</div></div>`).join('')}</div>
+ <div class="mu">المستحق ليس مالًا محصلًا؛ الإيراد الفعلي يُحسب من تواريخ الدفعات فقط.</div><br>
+ <div class="card tw rs">${bp.length?`<table><tr><th>الطالب</th><th>المستحق</th><th>المدفوع</th><th>المتبقي</th><th>الدفعات</th><th></th></tr>${bp.map(b=>`<tr><td>${esc(ST(b.sid)?.name)}</td><td>${b.amount}</td><td>${paid(b)}</td><td class="${bal(b)>0?'bad':'ok'}">${bal(b)}</td><td class="mu">${b.pays.map(p=>p.date+': '+p.amt+' ('+esc(p.method)+')').join(' | ')||'—'}</td><td>${bal(b)>0?`<button class="btn" onclick="pForm('${b.id}')">دفعة</button> <button class="btn s" onclick="showMsg('${b.sid}','تذكير بالسداد')">تذكير</button>`:`<span class="ok">مسدَّد</span> <button class="btn s" onclick="showMsg('${b.sid}','تأكيد استلام دفعة')">تأكيد</button>`}</td></tr>`).join('')}</table>`:'<div class="empty">لا فواتير لهذا الشهر.</div>'}</div>`);
+ $('#pp').onchange=e=>{pp=e.target.value||per();pay()};
+ $('#gb').onclick=()=>{let n=0;S.students.filter(s=>s.status==='active').forEach(s=>{if(s.fee>0&&!S.bills.some(b=>b.sid===s.id&&b.period===pp)){S.bills.push({id:uid(),sid:s.id,period:pp,amount:s.fee,pays:[]});n++}});save();toast(n?`تم إنشاء ${n} فاتورة`:'لا فواتير جديدة');pay()};
+}
+function pForm(id){
+ const b=S.bills.find(x=>x.id===id);
+ openDlg(`<h3>دفعة: ${esc(ST(b.sid).name)}</h3><div class="mu">المتبقي ${bal(b)} ج</div><label>المبلغ</label><input id="pa" type="number" min="1" max="${bal(b)}" value="${bal(b)}"><label>الطريقة</label><select id="pm"><option>نقدًا</option><option>فودافون كاش</option><option>تحويل بنكي</option><option>أخرى</option></select><label>التاريخ</label><input id="pd" type="date" value="${today()}"><div id="er" class="bad"></div><br><div class="row"><button class="btn" id="sv">حفظ</button><button class="btn s" onclick="closeDlg()">إلغاء</button></div>`);
+ $('#sv').onclick=()=>{const a=+$('#pa').value;if(!(a>0)||a>bal(b)){$('#er').textContent='المبلغ يجب أن يكون بين 1 والمتبقي';return}
+  b.pays.push({amt:a,date:$('#pd').value||today(),method:$('#pm').value});save();closeDlg();toast('تم تسجيل الدفعة');pay()};
+}
+
+/* ---------- messages ---------- */
+function fill(t,s,name,bo,dt){const g=G(s.gid)||{},b=bo||S.bills.find(b=>b.sid===s.id&&b.period===per()),pr=bo?bo.period:per();
+ const m={'اسم الطالب':s.name,'اسم ولي الأمر':s.parent,'الصف':g.grade||'','المجموعة':g.name||'','التاريخ':dt||(name==='غياب طالب'&&S.sessions.filter(x=>x.rec[s.id]==='absent').map(x=>x.date).sort().pop())||today(),'الشهر':MN[+pr.slice(5,7)-1],'المبلغ المستحق':b?b.amount:s.fee,'المبلغ المتبقي':b?bal(b):s.fee,'اسم المدرس':S.teacher,'رقم المدرس':S.tp,'عدد الحصص':sesN(s.id),'كود الطالب':s.code||''};if(glink(g))m['رابط الجروب']=glink(g);if(/\[(حضور|غياب|إجمالي الحصص|الحالة المالية)\]/.test(t))Object.assign(m,monStats(s,b));
+ return t.replace(/\[([^\]]+)\]/g,(a,k)=>Object.prototype.hasOwnProperty.call(m,k)?m[k]:a)}
+function logMsg(st){const tp=S.tpl[msT];if(S.log.some(l=>l.sid===msS&&l.type===msT&&l.text===msX&&l.status==='prep'))return;S.log.push({id:uid(),sid:msS,target:tp[0],type:msT,text:msX,date:today()+'T'+new Date().toTimeString().slice(0,8),status:st,result:'',next:''});save()}
+
+/* ---------- Free hybrid assistant: local rules + optional ChatGPT ---------- */
+function openFreeAssistant(){
+ const s=ST(msS);
+ if(!s){toast('أضف طالبًا أو مستهدفًا أولًا');return}
+ const targetStudent=(S.tpl[msT]||[])[0]==='student';
+ const recipient=targetStudent?'الطالب':'ولي الأمر';
+ const phone=targetStudent?nph(s.phone):nph(s.pphone);
+ const course=(s.grade||'').includes('تانية')?'علم نفس — تانية بكالوريا':
+              (s.grade||'').includes('أولى')?'فلسفة ومنطق — أولى بكالوريا':'حدد الصف والمادة قبل تخصيص الرسالة';
+ const recent=[...(S.log||[])].filter(x=>x.sid===s.id).slice(-3);
+ const last=recent.length?recent[recent.length-1]:null;
+ const status=last?(last.result||last.status||'تم تجهيز رسالة سابقًا'):'لا يوجد تواصل مسجل';
+ const suggestion=(!last)?'ابدأ برسالة قصيرة فيها سبب التواصل وسؤال واحد سهل الإجابة.':
+   /رد|مهتم|details|تفاصيل/i.test(status)?'اسأل عن الخطوة التي يحتاجها الآن، ثم اعرض معلومة واحدة واضحة.':
+   /عدم التواصل/i.test(status)?'لا ترسل رسائل أخرى؛ احترم طلب عدم التواصل.':
+   'جرّب متابعة واحدة مختصرة ومختلفة، ثم اترك مساحة للرد ولا تكرر الرسائل بإلحاح.';
+ const ctx=`ساعدني في كتابة رسالة واتساب طبيعية بالمصري لتحويل استفسار تعليمي إلى حجز، بدون ضغط أو وعود غير مؤكدة.\\nاسم المستهدف: ${s.name||'غير مسجل'}\\nالصف والمادة: ${course}\\nالمستلم: ${recipient}\\nحالة التواصل: ${status}\\nنوع الرسالة الحالية: ${msT}\\nالمطلوب: رسالة قصيرة، سؤال واحد واضح يشجع على الرد، واقتراح خطوة متابعة مناسبة. لا تخترع معلومات عن المدرس أو السعر أو المواعيد.`;
+ openDlg(`<h3>🧠 مساعد حسني الذكي — مجاني</h3>
+ <div class="card"><b>ملخص الحالة</b><div class="mu">المستهدف: ${esc(s.name||'غير مسجل')} · ${esc(recipient)}<br>المادة: ${esc(course)}<br>آخر نتيجة مسجلة: ${esc(status)}</div></div>
+ <div class="card"><b>اقتراح محلي بدون إنترنت</b><p>${esc(suggestion)}</p><div class="mu">الاقتراح مبني على بيانات التطبيق وقواعد ثابتة، وليس ردًا مولدًا من نموذج ذكاء اصطناعي.</div></div>
+ <label>تعليمات جاهزة لـ ChatGPT المجاني</label><textarea id="freeAiPrompt" rows="7">${esc(ctx)}</textarea>
+ <div class="row"><button class="btn" id="copyFreeAi">نسخ التعليمات</button><a class="btn s" id="openFreeChat" href="https://chatgpt.com/" target="_blank" rel="noopener">فتح ChatGPT</a></div>
+ <div class="mu" style="margin-top:8px">مجانًا دون API. عند فتح ChatGPT، انسخ التعليمات والصقها هناك. لا تُرسل أرقام هواتف أو بيانات شخصية غير ضرورية.</div>`);
+ const copy=$('#copyFreeAi');
+ if(copy)copy.onclick=async()=>{try{await navigator.clipboard.writeText($('#freeAiPrompt').value);toast('تم نسخ التعليمات')}catch(e){$('#freeAiPrompt').select();document.execCommand('copy');toast('تم النسخ إن سمح المتصفح')}};
+}
+
+function msg(){
+ if(!ST(msS))msS=S.students[0]?.id||'';const s=ST(msS);
+ if(!s){out('<h2>مركز الرسائل</h2><div class="empty">أضف طلابًا أولًا.</div>');return}
+ if(!S.tpl[msT])msT=Object.keys(S.tpl)[0];const tp=S.tpl[msT],targetStudent=tp[0]==='student',ph=targetStudent?nph(s.phone):nph(s.pphone),noPh=!ph;if(msX===null)msX=fill(tp[1],s,msT);
+ out(`<h2>مركز الرسائل</h2><div class="card"><b>🧠 مساعد حسني الذكي — مجاني</b><div class="mu">اقتراحات محلية تعمل دون API، مع خيار الاستعانة بـ ChatGPT عند الاتصال بالإنترنت.</div><button class="btn" onclick="openFreeAssistant()">فتح المساعد الذكي</button></div><div class="card"><div class="row"><select id="ms">${S.students.filter(x=>x.status==='active').map(x=>`<option value="${x.id}" ${x.id===msS?'selected':''}>${esc(x.name)}</option>`).join('')}</select><select id="mt">${Object.keys(S.tpl).map(k=>`<option ${k===msT?'selected':''}>${esc(k)}</option>`).join('')}</select></div>
+ <div class="mu">المستلم: ${targetStudent?'الطالب':'ولي الأمر ('+esc(s.parent||'غير مسجل')+')'} · ${esc(ph||'لا يوجد رقم')} ${noPh?`<b class="bad">لا يوجد رقم ${targetStudent?'للطالب':'لولي الأمر'}؛ أضفه من تعديل الطالب</b>`:''}</div><label>المعاينة (قابلة للتعديل قبل الاستخدام)</label><textarea id="mx" rows="6">${esc(msX)}</textarea>
+ <div class="row" style="margin-top:8px"><button class="btn" id="mc">نسخ</button><a class="btn s" id="mw" target="_blank" rel="noopener" href="${noPh?'#':wa(ph,msX)}">فتح واتساب مع ${targetStudent?'الطالب':'ولي الأمر'}</a><button class="btn s" onclick="tEdit()">تعديل القالب</button></div>
+ <div class="mu" style="margin-top:6px">يُسجَّل «تم تجهيز الرسالة» فقط؛ التطبيق لا يرسل شيئًا ولا يعرف إن أُرسلت.</div></div>
+ <h3>سجل الرسائل والمتابعات</h3>${S.log.length?[...S.log].reverse().map(l=>`<div class="card"><b>${esc(ST(l.sid)?.name)}</b> <span class="tag">${esc(l.type)}</span> <span class="tag wn">${SL[l.status]}</span><div class="mu">${l.target==='student'?'الطالب':'ولي الأمر'} · ${l.date.slice(0,10)}${l.result?' · النتيجة: '+esc(l.result):''}${l.next?' · التالية: '+l.next:''}</div><div class="mu">${esc(l.text.slice(0,90))}…</div><br><button class="btn s" onclick="lEdit('${l.id}')">تحديث الحالة</button></div>`).join(''):'<div class="empty">لا سجل بعد.</div>'}`);
+ $('#ms').onchange=e=>{msS=e.target.value;msX=null;msg()};$('#mt').onchange=e=>{msT=e.target.value;msX=null;msg()};
+ $('#mx').oninput=e=>{msX=e.target.value;if(!noPh)$('#mw').href=wa(ph,msX)};
+ $('#mw').onclick=e=>{if(noPh){e.preventDefault();toast('أضف رقم '+(targetStudent?'الطالب':'ولي الأمر')+' من تعديل بيانات الطالب');return}if(!navigator.onLine){e.preventDefault();toast('واتساب يحتاج إنترنت؛ انسخ الرسالة وأرسلها لاحقًا');return}logMsg('prep');setTimeout(()=>page==='msg'&&msg(),300)};
+ $('#mc').onclick=()=>{logMsg('prep');(navigator.clipboard?navigator.clipboard.writeText(msX):Promise.reject()).then(()=>toast('تم النسخ وتسجيل التجهيز'),()=>{$('#mx').select();toast('حدد النص وانسخه يدويًا · سُجّل التجهيز')});setTimeout(()=>page==='msg'&&msg(),1500)};
+}
+function tEdit(){openDlg(`<h3>قالب: ${esc(msT)}</h3><p class="mu">المتغيرات: [اسم الطالب] [اسم ولي الأمر] [الصف] [المجموعة] [التاريخ] [الشهر] [المبلغ المستحق] [المبلغ المتبقي] [اسم المدرس] [رقم المدرس] [رابط الجروب]</p><textarea id="te" rows="6">${esc(S.tpl[msT][1])}</textarea><br><br><div class="row"><button class="btn" id="sv">حفظ</button><button class="btn s" onclick="closeDlg()">إلغاء</button></div>`);$('#sv').onclick=()=>{S.tpl[msT][1]=$('#te').value;save();closeDlg();msX=null;msg()}}
+function lEdit(id){const l=S.log.find(x=>x.id===id);
+ openDlg(`<h3>تحديث المتابعة</h3><label>الحالة</label><select id="ls">${Object.entries(SL).map(k=>`<option value="${k[0]}" ${l.status===k[0]?'selected':''}>${k[1]}</option>`).join('')}</select><label>نتيجة التواصل</label><input id="lr" value="${esc(l.result)}"><label>موعد المتابعة التالية</label><input id="ln" type="date" value="${l.next}"><br><br><div class="row"><button class="btn" id="sv">حفظ</button><button class="btn s" onclick="closeDlg()">إلغاء</button></div>`);
+ $('#sv').onclick=()=>{l.status=$('#ls').value;l.result=$('#lr').value;l.next=$('#ln').value;const s=ST(l.sid);if(s&&l.status==='done')s.lastContact=today();if(s&&l.next){s.nextDate=l.next;s.nextAction=s.nextAction||'متابعة بعد '+l.type}else if(s&&['done','closed'].includes(l.status)&&s.nextDate&&s.nextDate<=today()){s.nextDate='';s.nextAction=''}save();closeDlg();msg()}}
+
+/* ---------- actions ---------- */
+function acts(){
+ const o=S.actions.filter(a=>a.status==='open').sort((a,b)=>a.due.localeCompare(b.due)),r=S.set;
+ out(`<h2>المتابعات والإجراءات</h2><div class="row"><button class="btn" onclick="aForm()">+ إجراء</button><button class="btn s" id="ag2">إنشاء إجراءات من القواعد</button></div><br>
+ ${o.length?o.map(a=>`<div class="card"><b>${esc(ST(a.sid)?.name)}</b> <span class="tag">${esc(a.type)}</span> <span class="tag ${a.prio==='high'?'bad':''}">${{high:'عاجل',mid:'عادي',low:'منخفض'}[a.prio]}</span> ${a.due<today()?'<span class="tag bad">متأخر</span>':''}<div class="mu">الاستحقاق ${a.due} ${esc(a.notes)}</div><br><button class="btn" onclick="aDone('${a.id}')">تم</button> <button class="btn s" onclick="showMsg('${a.sid}','رسالة عامة لولي الأمر')">رسالة</button></div>`).join(''):'<div class="empty">لا إجراءات مفتوحة.</div>'}
+ <h3>قواعد المتابعة</h3><div class="card"><div class="row"><div><label>حد الغياب</label><input id="r1" type="number" min="1" value="${r.absLimit}"></div><div><label>يوم تأخر الاشتراك من الشهر</label><input id="r2" type="number" min="1" max="31" value="${r.dueDay}"></div><div><label>أيام بدون تواصل</label><input id="r3" type="number" min="1" value="${r.contactDays}"></div></div><br><button class="btn" id="rs">حفظ القواعد</button></div>`);
+ $('#rs').onclick=()=>{S.set={...S.set,absLimit:+$('#r1').value||3,dueDay:+$('#r2').value||15,contactDays:+$('#r3').value||30};save();toast('تم الحفظ')};
+ $('#ag2').onclick=()=>{let n=0;needs().forEach(x=>{if(addAct(x.s.id,x.act,'mid',today(),x.why,x.key))n++});save();toast(n+' إجراء جديد');acts()};
+}
+function aDone(id){S.actions.find(a=>a.id===id).status='done';save();acts()}
+function aForm(){openDlg(`<h3>إجراء جديد</h3><label>الطالب</label><select id="a1">${S.students.filter(s=>s.status==='active').map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select><label>النوع</label><input id="a2" value="التواصل مع ولي الأمر"><label>الأولوية</label><select id="a3"><option value="high">عاجل</option><option value="mid" selected>عادي</option><option value="low">منخفض</option></select><label>تاريخ الاستحقاق</label><input id="a4" type="date" value="${today()}"><label>ملاحظات</label><input id="a5"><br><br><div class="row"><button class="btn" id="sv">حفظ</button><button class="btn s" onclick="closeDlg()">إلغاء</button></div>`);
+ $('#sv').onclick=()=>{if(!$('#a1').value)return;addAct($('#a1').value,$('#a2').value,$('#a3').value,$('#a4').value||today(),$('#a5').value);save();closeDlg();acts()}}
+
+/* ---------- reports ---------- */
+let rg='',rf='',rt='';
+function rep(){
+ const sess=S.sessions.filter(x=>(!rg||x.gid===rg)&&(!rf||x.date>=rf)&&(!rt||x.date<=rt));
+ const rows=S.students.filter(s=>s.status==='active'&&(!rg||s.gid===rg)).map(s=>{const m=sess.filter(x=>x.gid===s.gid&&x.rec[s.id]);const p=m.filter(x=>['present','late'].includes(x.rec[s.id])).length,a=m.filter(x=>x.rec[s.id]==='absent').length;return[s.name,m.length,p,a,m.length?Math.round(p/m.length*100)+'%':'—']}).filter(r=>r[1]);
+ const pays=[];S.bills.forEach(b=>b.pays.forEach(p=>{if((!rg||ST(b.sid)?.gid===rg)&&(!rf||p.date>=rf)&&(!rt||p.date<=rt))pays.push([ST(b.sid)?.name,p.date,p.amt,p.method,perAr(b.period)])}));
+ const tot=pays.reduce((a,p)=>a+p[2],0),unpaid=S.bills.filter(b=>bal(b)>0&&(!rg||ST(b.sid)?.gid===rg));
+ const nc=S.students.filter(s=>s.status==='active'&&(!rg||s.gid===rg)&&(!s.lastContact||days(s.lastContact)>S.set.contactDays));
+ RR=[[['الطالب','جلسات','حضور','غياب','النسبة'],...rows],[['الطالب','التاريخ','المبلغ','الطريقة','الفترة'],...pays]];const lc={};S.log.forEach(l=>lc[l.status]=(lc[l.status]||0)+1);
+ out(`<h2>التقارير</h2><div class="card"><div class="row"><select id="rg"><option value="">كل المجموعات</option>${S.groups.map(g=>`<option value="${g.id}" ${rg===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select><input type="date" id="rf" value="${rf}"><input type="date" id="rt" value="${rt}"></div></div>
+ <h3>الحضور والغياب</h3><div class="card tw">${rows.length?`<table><tr><th>الطالب</th><th>جلسات</th><th>حضور</th><th>غياب</th><th>النسبة</th></tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table><br><button class="btn s" onclick="csvDlg(RR[0])">CSV</button>`:'<div class="empty">لا بيانات.</div>'}</div>
+ <h3>التحصيل</h3><div class="card">المحصّل في النطاق: <b class="ok">${tot} ج</b> (${pays.length} دفعة) · متبقي إجمالي لفواتير غير مسددة: <b class="bad">${unpaid.reduce((a,b)=>a+bal(b),0)} ج</b> (${unpaid.length} فاتورة)${pays.length?`<br><br><button class="btn s" onclick="csvDlg(RR[1])">CSV المدفوعات</button>`:''}</div>
+ <h3>المتابعة</h3><div class="card">بلا تواصل منذ ${S.set.contactDays} يومًا: <b>${nc.length}</b> · إجراءات متأخرة: <b class="bad">${S.actions.filter(a=>a.status==='open'&&a.due<today()).length}</b><br>نتائج الرسائل: ${Object.keys(lc).length?Object.entries(lc).map(k=>SL[k[0]]+' '+k[1]).join(' · '):'لا سجل'}</div>`);
+ $('#rg').onchange=e=>{rg=e.target.value;rep()};$('#rf').onchange=e=>{rf=e.target.value;rep()};$('#rt').onchange=e=>{rt=e.target.value;rep()};
+}
+
+/* ---------- backup ---------- */
+function valid(o){try{const A=k=>Array.isArray(o[k]);if(!o||typeof o!=='object'||!['students','groups','sessions','bills'].every(A))return false;
+ for(const k of ['log','actions','prospects','fridays'])if(o[k]!==undefined&&!A(k))return false;
+ const all=[...o.students,...o.groups,...o.sessions,...o.bills,...(o.log||[]),...(o.actions||[]),...(o.prospects||[]),...(o.fridays||[])].map(x=>x&&x.id);
+ if(all.some(i=>typeof i!=='string'||!IDR.test(i))||new Set(all).size!==all.length)return false;
+ const G_=new Set(o.groups.map(g=>g.id)),S_=new Set(o.students.map(s=>s.id));
+ if(!o.students.every(s=>s.name&&s.pphone&&(!s.gid||G_.has(s.gid))))return false;
+ const sk=new Set();for(const x of o.sessions){if(!G_.has(x.gid)||!DR.test(x.date)||!x.rec||typeof x.rec!=='object'||!Object.values(x.rec).every(v=>AR[v]))return false;if(sk.has(x.gid+x.date))return false;sk.add(x.gid+x.date)}
+ const bk=new Set();for(const b of o.bills){if(!S_.has(b.sid)||!PR.test(b.period)||!(b.amount>=0)||!Array.isArray(b.pays))return false;if(bk.has(b.sid+b.period))return false;bk.add(b.sid+b.period);
+  if(!b.pays.every(p=>p.amt>0&&isFinite(p.amt)&&DR.test(p.date))||b.pays.reduce((a,p)=>a+p.amt,0)>b.amount+0.005)return false}
+ if((o.log||[]).some(l=>!S_.has(l.sid)||typeof l.text!=='string'||!SL[l.status]))return false;
+ if((o.actions||[]).some(a=>!S_.has(a.sid)||!DR.test(a.due)))return false;
+ if((o.prospects||[]).some(p=>!p||typeof p.phone!=='string'||!PH.test(nph(p.phone))||!['new','contacted','interested','booked','attended','converted','notinterested','stop'].includes(p.stage)))return false;
+ const P_=new Set((o.prospects||[]).map(p=>p.id));if((o.fridays||[]).some(f=>!f||!DR.test(f.date)||!Array.isArray(f.booked)||!Array.isArray(f.attended)||f.booked.some(id=>!P_.has(id))||f.attended.some(id=>!P_.has(id))))return false;
+ const sc=o.students.map(s=>s.code).filter(Boolean);if(sc.some(c=>!/^MH-[A-Z0-9]{5}$/.test(c))||new Set(sc).size!==sc.length)return false;
+  const fc=(o.fridays||[]).flatMap(f=>Object.entries(f.codes||{}));if(fc.some(([k,c])=>!P_.has(k)||!/^F-[A-Z0-9]{4}$/.test(c))||new Set(fc.map(x=>x[1])).size!==fc.length)return false;
+  if(o.plan!==undefined&&!(o.plan&&Number.isFinite(o.plan.goal)&&Number.isFinite(o.plan.daily)&&o.plan.rates&&Object.values(o.plan.rates).every(Number.isFinite)))return false;
+  if(o.students.some(s=>s.refBy&&!/^MH-[A-Z0-9]{5}$/.test(s.refBy))||(o.prospects||[]).some(p=>p.refCode&&!/^MH-[A-Z0-9]{5}$/.test(p.refCode)))return false;
+  if(o.codes!==undefined&&!(Array.isArray(o.codes)&&o.codes.every(c=>typeof c==='string')))return false;
+  if(o.groups.some(g=>g.wlink&&!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9_-]+$/.test(g.wlink)))return false;
+  if(o.tp!==undefined&&o.tp!==''&&!PH.test(o.tp))return false;
+ if(o.tpl!==undefined&&!(o.tpl&&typeof o.tpl==='object'&&Object.values(o.tpl).every(v=>Array.isArray(v)&&v.length===2&&['parent','student'].includes(v[0])&&typeof v[1]==='string')&&Object.keys(o.tpl).length))return false;
+ return true}catch(e){return false}}
+async function bkp(){const f=new File([JSON.stringify(S)],'mh-tracker-backup-'+today()+'.json',{type:'application/json'});
+ try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'MH Tracker backup'});else{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove()}
+  S.lastBackup=today();const saved=save();toast(saved?'تم تجهيز النسخة وحفظ تاريخها':'تم تصدير النسخة، لكن تعذّر حفظ تاريخ النسخ داخل التطبيق');if(page==='data')data();else if(page==='dash')dash()}catch(e){if(e.name!=='AbortError')toast('تعذر التصدير؛ انسخ النص من مربع التصدير')}}
+function data(){
+ out(`<h2>النسخ الاحتياطي</h2><div class="warn">البيانات محفوظة في هذا المتصفح فقط، لا تتزامن بين الأجهزة، وقد تُفقد إذا مُسحت بيانات المتصفح. خذ نسخة احتياطية بانتظام. التطبيق بلا تسجيل دخول، فلا تتركه مفتوحًا لغيرك. على الآيفون: بيانات Safari منفصلة عن بيانات التطبيق المثبّت على الشاشة الرئيسية، فانقل البيانات بالتصدير ثم الاستعادة. لا تتزامن البيانات تلقائيًا مع أي جهاز آخر.</div>
+ <div class="card"><h3>تصدير</h3><button class="btn" onclick="bkp()">مشاركة / حفظ ملف النسخة الاحتياطية</button><div class="mu">آخر نسخة: ${S.lastBackup||'لم تؤخذ'}</div><br><textarea id="ex" rows="4" readonly onclick="this.select()">${esc(JSON.stringify(S))}</textarea><div class="mu">انسخ النص واحفظه في ملف أو رسالة لنفسك.</div></div>
+ <div class="card"><h3>استعادة</h3><textarea id="im" rows="4" placeholder="ألصق النسخة هنا"></textarea><br><br><button class="btn" id="ib">تحقق ثم استعد</button><div id="er" class="bad"></div></div>
+ ${(()=>{try{let h='';const items=[[KEY+'_corrupt','نسخة خام من بيانات تعذّرت قراءتها'],[KEY+'_pre_restore','نسخة محفوظة تلقائيًا قبل الاستعادة'],[KEY+'_pre_clear','نسخة محفوظة تلقائيًا قبل المسح'],[KEY+'_pre_delete','نسخة محفوظة تلقائيًا قبل آخر حذف']];items.forEach(([k,title])=>{const v=localStorage.getItem(k);if(v)h+='<div class="card"><h3>'+title+'</h3><p class="mu">انسخ هذا النص واحتفظ به خارج التطبيق، أو الصقه في خانة الاستعادة إذا احتجت إليه.</p><textarea rows="4" readonly onclick="this.select()">'+esc(v)+'</textarea></div>'});return h}catch(e){return '<div class="warn">تعذّر قراءة النسخ المحلية المحفوظة.</div>'}})()}<div class="card"><h3>مسح كل البيانات</h3><button class="btn d" id="cl">مسح</button></div>`);
+ $('#ib').onclick=()=>{try{const o=JSON.parse($('#im').value);if(!valid(o))throw 0;
+  cf(`النسخة صالحة (${o.students.length} طالب، ${o.bills.length} فاتورة). قبل الاستبدال سيحاول التطبيق حفظ نسخة من البيانات الحالية محليًا. متابعة؟`,()=>{try{localStorage.setItem(KEY+'_pre_restore',JSON.stringify(S))}catch(e){$('#er').textContent='تعذّر حفظ نسخة من البيانات الحالية قبل الاستعادة. انسخ النص الحالي من مربع التصدير أو صدّره أولًا، ثم أعد المحاولة.';return}const previous=S;S=fix(o);dr=null;msS='';msX=null;const ok=save(true);if(ok){toast('تمت الاستعادة وحفظ نسخة سابقة محليًا');data()}else{S=previous;mem=previous;try{localStorage.setItem(KEY,JSON.stringify(previous))}catch(_){}toast('فشلت كتابة النسخة المستعادة؛ أُعيدت البيانات السابقة في الذاكرة. تحقق من مساحة التخزين قبل المحاولة مجددًا.');data()}})}catch(e){$('#er').textContent='النسخة غير صالحة أو ناقصة؛ لم يتغير شيء.'}};
+ $('#cl').onclick=()=>cf('سيتم حذف كل الطلاب والحضور والمدفوعات والرسائل نهائيًا. هل أخذت نسخة احتياطية؟',()=>{try{localStorage.setItem(KEY+'_pre_clear',JSON.stringify(S))}catch(e){toast('تعذّر حفظ نسخة قبل المسح؛ لم يتم المسح. صدّر نسخة أولًا.');return}const previous=S;S=fix({students:[],groups:[],teacher:S.teacher,tp:S.tp,set:S.set,plan:S.plan,tpl:S.tpl,pTpl:S.pTpl,fTpl:S.fTpl,onb:S.onb});dr=null;msS='';msX=null;const ok=save(true);if(!ok){S=previous;mem=previous;try{localStorage.setItem(KEY,JSON.stringify(previous))}catch(_){}}toast(ok?'تم المسح وحفظ نسخة سابقة محليًا':'فشل حفظ المسح؛ أُعيدت البيانات السابقة في الذاكرة. تحقق من مساحة التخزين');shell()});
+}
+const off=()=>$('#off').style.display=navigator.onLine?'none':'block';addEventListener('online',off);addEventListener('offline',off);off();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+boot();
+</script>
+</body>
+</html>
